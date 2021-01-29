@@ -9,7 +9,7 @@ Kalenis frontend replace the list views provided by [Tryton SAO](https://github.
 * **Context Menu on right click (inspired on GTK client)**
 * **Allow the user to change records quantity on the view**
 * **Comfortable or compact view**
-* **User Views Support:** Kalenis frontend depends on [Kalenis User View](https://github.com/Kalenis/kalenis_user_view) module, wich is necessary for:
+* **User Views Support:** Kalenis frontend depends on [Kalenis User View](https://github.com/Kalenis/kalenis_user_view) module, which is necessary for:
   * Create and save several views, including columns visibility, width & order, filters, order and records quantity.
   * Each view could be user specific or available to all users.
   * All of this operations are restricted by permissions, considering the following options:
