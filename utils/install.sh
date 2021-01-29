@@ -9,11 +9,12 @@ if [ -d "./sao" ]; then
 fi
 
 echo "Downloading SAO"
-hg clone https://hg.tryton.org/sao/ 
+# hg clone https://hg.tryton.org/sao/ 
+git clone https://github.com/tryton/sao.git
 
 cd sao
 
-hg update 5.4
+git checkout 5.4
 rm ./Gruntfile.js 
 cp ../Gruntfile.js .
 
