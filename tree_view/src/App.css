@@ -1,0 +1,127 @@
+.App {
+  text-align: left;
+  /* height:100vh; */
+  /* height:100%; */
+  overflow-y:auto;
+
+  /* Vtable only */
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  background-color: #FFF;
+  /* padding: 0 1rem 1rem 1rem; */
+  /* overflow: auto; */
+  background: white;
+  /* margin-left:5px; */
+  /* background-color:red; */
+  
+}
+
+
+
+.icon-row{
+  width:25%;
+  max-width:15px;
+  
+  margin-right:2px;
+
+
+}
+
+/* textarea[required=required]:after */
+
+
+
+.disabled-icon{
+  background-color:rgba(234,234,234,0.8);
+  color:grey;
+  cursor:not-allowed;
+}
+
+.hoverable-icon{
+  color:grey
+}
+
+
+.hoverable-icon:hover{
+  color: rgb(40,80,146);
+  cursor:pointer;
+}
+
+.primary-icon{
+  color: rgb(40,80,146);
+  cursor:pointer;
+}
+
+
+/* mocked from TAILWIND => remove on migration */
+
+.bg-white{
+  background-color:white;
+}
+
+.shadow-xl{
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,.1), 0 10px 10px -5px rgba(0,0,0,.04);
+}
+
+.bg-modal-background{
+  background-color:hsla(0,0%,42.4%,.2);
+  z-index:9999;
+}
+
+.inset-0{
+  top:0;
+  right:0;
+  bottom:0;
+  left:0;
+}
+
+.absolute{
+  position:absolute;
+}
+
+.px-4{
+  padding-right:1rem;
+  padding-left:1rem;
+}
+
+.pt-6{
+  padding-top:1.5rem;
+}
+
+.pb-2{
+  padding-bottom:.5rem;
+}
+
+.pb-6{
+  padding-bottom:1.5rem;
+}
+
+
+
+
+
+
+/* .autocomplete-menu-item{
+  outline:none !important;
+ 
+}
+.autocomplete-menu-item:hover {
+  background-color:rgb(36,126,182) !important;
+  color:white !important;
+}
+.autocomplete-menu-item:focus-within {
+  background-color:rgb(36,126,182) !important;
+  color:white !important;
+} */
+
+
+
+
+
+
+
+
+
+
+

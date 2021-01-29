@@ -1,0 +1,56 @@
+/* .kalenis-form-table{
+    table-layout: fixed !important;
+
+}
+.kalenis-form-table tr > td {
+    
+    padding:5px;
+    width:25%;
+   
+    text-align: right !important;
+} */
+
+body{
+    font-family:"Roboto", "Noto" !important;
+    font-size:12px;
+    font-weight:500;
+}
+.badge {
+    max-width:10em !important;
+}
+
+#menu > .treeview{
+   
+    overflow-x:auto !important;
+  
+}
+
+#menu .treeview > table > tbody > tr {
+    color: #666666;
+    font-size:12px !important;  
+}
+
+.dropdown-menu>li>a{
+    font-size:12px;
+    color: #666666;
+}
+
+.navbar-btn{
+    background-color:transparent !important;
+    border:0px !important;
+}
+
+.navbar-btn:hover{
+    /* background-color:transparent !important; */
+    border:0px !important;
+    background-color:rgba(153, 146, 146, 0.6) !important;
+    /* border-radius:16px !important; */
+    /* -webkit-box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
+    -moz-box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
+    box-shadow: 10px 10px 5px 0px rgba(153, 146, 146, 0.6); */
+
+}
+
+.form .form-one2many-content .treeview{
+    max-height:none !important;
+}
