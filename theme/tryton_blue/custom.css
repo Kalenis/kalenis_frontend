@@ -1,3 +1,7 @@
+:root {
+    --primary-color: #1565c0;
+  }
+
 
 body{
     font-family:"Roboto", "Noto" !important;
@@ -19,13 +23,21 @@ body{
 
 .badge {
     max-width:10em !important;
+    background-color:rgba(249,249,249,0.3)
 }
 
 /* Top app bar */
 .navbar-static-top{
-    background-color:rgb(36,126,182) !important;
+    /* original */
+    /* background-color:rgb(36,126,182) !important; */
+    /* background-color:#1565c0; */
+    background-color:var(--primary-color);
+    box-shadow:0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12);
     border:0px !important;
+    z-index:1000 !important;
 }
+
+
 
 
 /* Title top left */
@@ -35,10 +47,22 @@ body{
 }
 
 
-/* App bars title */
+/* common navbar brand */
 .navbar-brand{
     color:white !important;
-    
+   
+    /* text-align: center; */
+}
+
+/* App bars title */
+.navbar-brand-appbar{
+    color:white !important;
+    margin-top:5px;
+    /* text-align: center; */
+}
+
+.navbar-brand-logo{
+    height:35px;
 }
 
 /* #tablist > li > active{
@@ -48,7 +72,7 @@ body{
 #tablist > .active > a{
     /* background-color:white !important; */
     background-color:rgb(249,249,249) !important;
-    color:rgb(40,80,146) !important;
+    color:black !important;
     margin-bottom: 0.5em !important;
     margin-top:7px !important;
     margin-right:0.5em !important;
@@ -62,9 +86,13 @@ body{
 
 
 .navbar-default .navbar-nav>li>a{
-    /* background-color:red !important; */
+    
     background-color:rgba(249,249,249,0.3) !important;
+
+  
     color:rgb(40,80,146) !important;
+    /* color:white; */
+    border:none;
    
     margin-bottom: 5px !important;
     margin-top:7px !important;
@@ -89,18 +117,24 @@ body{
 } */
 
 .toolbar{
-    background-color:rgb(36,126,182) !important;
+    /* background-color:rgb(36,126,182) !important; */
+    background-color:var(--primary-color);
+    box-shadow:0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12);
+    border:none;
     color:white !important;
     
 }
 
 .window-form-toolbar{
-    background-color:rgb(36,126,182) !important;
+    /* background-color:rgb(36,126,182) !important; */
+    background-color:var(--primary-color) !important;
 }
 
 #menu {
     background-color:white !important;
     overflow-x:scroll !important;
+    margin:0;
+    z-index:970;
     
 }
 
@@ -132,8 +166,21 @@ body{
     color:rgb(40,80,146) !important;
     font-weight:600 !important;
     border-radius:4px !important;
+    outline: none;
     
 }
+#menu .treeview > table > tbody > tr > td > div > .widget > div {
+    outline: none !important;
+    /* background-color: red !important; */
+}
+
+
+/* #menu .treeview > table > tbody > tr > td > div > .widget:active {
+    outline: none !important;
+    background-color: red !important;
+} */
+
+
 #user-preferences > a{
     color:white !important;
     background-color:transparent !important;
@@ -168,16 +215,17 @@ body{
 }
 
 .btn-default{
-    color:rgb(36,126,182);
+    /* color:rgb(36,126,182); */
+    /* color:var(--primary-color); */
     font-size:12px;
+    font-weight: 600;
 }
 
 .btn-default:hover{
-    background-color:rgb(36,126,182);
-
-    /* color:rgb(40,80,146); */
-    color:white;
+    color:rgb(36,126,182);
     font-size:12px;
+    font-weight: 600;
+    
 }
 
 .btn-default:disabled{
@@ -206,7 +254,8 @@ body{
 }
 
 .panel-default>.panel-heading{
-    background-color:rgb(36,126,182) !important;
+    /* background-color:rgb(36,126,182) !important; */
+    background-color:var(--primary-color);
     color:white !important
 }
 
@@ -216,12 +265,11 @@ body{
 }
 
 .form{
-    /* border: 1px solid red !important; */
     border-radius:4px !important;
     background-color:white !important;
     padding:4px !important;
-    -webkit-box-shadow: 5px 5px 5px 5px rgba(0,0,0,0.75);
-    -moz-box-shadow: 5px 5px 5px 5px rgba(0,0,0,0.75);
+    -webkit-box-shadow: 2px 2px 2px 2px rgba(0,0,0,0.30);
+    -moz-box-shadow: 2px 2px 2px 2px rgba(0,0,0,0.30);
     box-shadow: 2px 2px 2px 2px rgba(0,0,0,0.30);
     margin-bottom:5px !important;
     opacity: 1;
@@ -230,6 +278,8 @@ body{
 	animation-timing-function: ease-in;
 	animation-duration: 0.2s;
 }
+
+
 
 @keyframes fadeInOpacity {
 	0% {
@@ -267,23 +317,26 @@ body{
     box-shadow: 2px 2px 4px 0px rgba(0,0,0,0.30) !important; */
 }
 
-.nav-tabs>li.active>a>span.badge{
-    background-color:rgb(36,126,182) !important;
-    color:white !important;
-}
-.HeaderGrid{
-    /* background-color:#d3d5cf !important; */
-    /* color:rgb(40,80,146) !important;  */
-    /* border: 1px solid rg !important; */
-    /* color:rgb(40,80,146) !important; */
-    
-    /* background-color:white !important;
-    color:rgb(40,80,146) !important; */
+
+.custom-badge{
+    /* background-color:red !important; */
 }
 
-/* .headerCellContent{
-    font-weight:normal !important;
+/* .nav-tabs>li.active>a>span.badge{
+    background-color:rgb(36,126,182) !important;
+    color:white !important;
 } */
+
+.m2m-counter{
+    margin-left:5px;
+}
+
+
+.tab-domain-active .custom-badge{
+ 
+    background-color:var(--primary-color) !important;
+   
+  }
 
 
 
@@ -329,8 +382,115 @@ body{
 
 
 
-/* modified offcanvas */
+
+#global-search:focus-within > div > div #user-favorites > button{
+    background:white !important;
+    border:none;
+}
+
+#global-search-entry{
+    background-color:rgba(249,249,249,0.3);
+    border:none;
+    color:white;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+    outline:none !important;
+}
+
+#global-search-entry:focus-within{
+    background-color:white;
+    border:none;
+    color:black;
+}
+
+#global-search-entry::-webkit-input-placeholder {
+    color:rgba(249,249,249,0.3);
+}
 
 
+#global-search-entry::-moz-placeholder {
+    color:rgba(249,249,249,0.3);
+}
 
+#global-search-entry::ms-placeholder {
+    color:rgba(249,249,249,0.3);
+}
+
+
+#user-favorites > button{
+    background:rgba(249,249,249,0.3);
+    border:none;
+}
+
+.form .form-one2many-content .treeview{
+    max-height:none !important;
+}
+
+.graph{
+    background-color:white !important;
+    padding:2em;
+    -webkit-box-shadow: 5px 5px 5px 5px rgba(0,0,0,0.75);
+    -moz-box-shadow: 5px 5px 5px 5px rgba(0,0,0,0.75);
+    box-shadow: 2px 2px 2px 2px rgba(0,0,0,0.30);
+}
+
+.calendar{
+    background-color:white !important;
+    padding:1em;
+    -webkit-box-shadow: 5px 5px 5px 5px rgba(0,0,0,0.75);
+    -moz-box-shadow: 5px 5px 5px 5px rgba(0,0,0,0.75);
+    box-shadow: 2px 2px 2px 2px rgba(0,0,0,0.30); 
+}
+
+.global_search-icon{
+    
+    max-width: 20px;
+}
+
+.invisible {
+    display:none;
+}
+
+.infobar{
+    left:-50px !important;
+    width:20%;
+    animation-name: slide;
+    transform:none;
+    min-width: 0px;
+	animation-iteration-count: 1;
+	animation-timing-function: ease-in;
+	animation-duration: 0.2s;
+    animation-fill-mode: forwards;
+}
+
+@keyframes slide {
+	0% {
+		transform: translate(-90%);
+	}
+	100% {
+		transform: translateX(20%)
+	}
+}
+
+/* Board rules */
+
+.panel-heading-board{
+    background-color:transparent;
+    color: #999;
+    font-size:16px;
+    background:white;
+    padding:5px;
+    padding-left:10px;
+}
+.panel-board{
+    background:white !important;
+    border:0.1px solid #9999 !important
+}
+
+.panel-body-board{
+    padding:10px;
+    padding-right:15px;
+}
 
