@@ -3500,14 +3500,16 @@ Sao.View.Board.Action.prototype.init =  function(attributes, context) {
         }.bind(this));
     }.bind(this));
     this.el = jQuery('<div/>', {
-        'class': 'board-action panel panel-default',
+        'class': 'board-action panel panel-board',
     });
     this.title = jQuery('<div/>', {
-        'class': 'panel-heading',
+        // 'class': 'panel-heading',
+        'class':'panel-heading-board'
+        
     });
     this.el.append(this.title);
     this.body = jQuery('<div/>', {
-        'class': 'panel-body',
+        'class': 'panel-body-board',
     });
     this.el.append(this.body);
 };
