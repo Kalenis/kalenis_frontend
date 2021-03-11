@@ -16,12 +16,12 @@ const Sao = window.Sao
 
 const { Option } = components;
 
-const row_options = [
-    {value:200, label:'200 '+window.Sao.i18n.gettext('Rows')},
-    {value:500, label:'500 '+window.Sao.i18n.gettext('Rows')},
-    {value:1000, label:'1000 '+window.Sao.i18n.gettext('Rows')},
-    {value:2000, label:'2000 '+window.Sao.i18n.gettext('Rows')},
-]
+// const row_options = [
+//     {value:200, label:'200 '+window.Sao.i18n.gettext('Rows')},
+//     {value:500, label:'500 '+window.Sao.i18n.gettext('Rows')},
+//     {value:1000, label:'1000 '+window.Sao.i18n.gettext('Rows')},
+//     {value:2000, label:'2000 '+window.Sao.i18n.gettext('Rows')},
+// ]
 
 const ListViewStyles = {
     menu: (provided, state) => ({
@@ -125,6 +125,68 @@ const One2ManyStyles = {
 
 
 }
+
+const BoardStyle = {
+    menu: (provided, state) => ({
+        ...provided,
+        borderRadius: '0px',
+        marginTop: '0px'
+    }),
+    container: (provided, state) => ({
+        ...provided,
+        // width: '80%'
+    }),
+
+    control: (provided, state) => ({
+
+        ...provided,
+
+        height: '100%',
+        // minHeight: '1px',
+        backgroundColor: 'transparent',
+        border: 'none',
+        minHeight: '0px'
+
+    }),
+    menu: (provided, state) => ({
+        ...provided,
+        width: '150px'
+    }),
+    menuPortal: (provided, state) => ({
+        ...provided,
+        zIndex: 9999
+    }),
+
+    valueContainer: (provided, state) => ({
+        ...provided,
+        height: '20px',
+        display: 'none'
+
+    }),
+    indicatorsContainer: (provided, state) => ({
+        ...provided,
+        backgroundColor: 'transparent',
+        // color:'white'
+        // height: '30px'
+    }),
+    // dropdownIndicator: (provided, state) => ({
+    //     ...provided,
+    //     // backgroundColor: 'transparent',
+    //     color: 'white',
+    //     ':hover': {
+
+    //         color: 'white',
+    //     },
+    //     // height: '30px'
+    // }),
+    indicatorSeparator: (provided, state) => ({
+        // ...provided,
+        display: 'none'
+        // height: '30px'
+    }),
+
+
+}
 const selectFormStyles = {
     menuPortal: (provided, state) => ({
         ...provided,
@@ -144,6 +206,7 @@ function ViewForm(props) {
         { 'label': Sao.i18n.gettext('Comfortable'), 'value': 'comfortable' },
         { 'label': Sao.i18n.gettext('Compact'), 'value': 'compact' },
     ]
+    
 
     useEffect(() => {
 
@@ -400,7 +463,12 @@ function ViewManager(props) {
     const [viewListModal, setViewListModal] = useState(false)
     const [records_qty, setRecordsQty] = useState("")
 
-
+    const row_options = [
+        {value:200, label:'200 '+window.Sao.i18n.gettext('Rows')},
+        {value:500, label:'500 '+window.Sao.i18n.gettext('Rows')},
+        {value:1000, label:'1000 '+window.Sao.i18n.gettext('Rows')},
+        {value:2000, label:'2000 '+window.Sao.i18n.gettext('Rows')},
+    ]
 
 
 
@@ -571,6 +639,23 @@ function ViewManager(props) {
         
         props.changeViewLimit(value.value)
     }
+
+    const componentStyle = () => {
+
+        if(props.widget_type === 'list_view'){
+            if(!props.board_child){
+                return ListViewStyles
+            }
+            else{
+                
+                return BoardStyle
+            }
+        }
+        else{
+            return One2ManyStyles
+        }
+
+    }
    
 
 
@@ -596,7 +681,8 @@ function ViewManager(props) {
                 isSearchable={false}
                 value={value}
                 components={{ DropdownIndicator: DropdownInd, Option: CustomSelectOption }}
-                styles={props.widget_type === 'list_view' ? ListViewStyles : One2ManyStyles}
+                // styles={props.widget_type === 'list_view' && !props.board_child ? ListViewStyles : One2ManyStyles}
+                styles={componentStyle()}
                 menuPortalTarget={document.body}
                 // menuPortalTarget={document.getElementById(props.target)}
                 menuPosition={'fixed'}

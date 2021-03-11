@@ -1,5 +1,5 @@
 #!/bin/sh
-# V5.4
+# V5.0
 cd ..
 
 if [ -d "./sao" ]; then
@@ -14,14 +14,16 @@ git clone https://github.com/tryton/sao.git
 
 cd sao
 
-git checkout 5.4
+git checkout 5.0
 rm ./Gruntfile.js 
 cp ../Gruntfile.js .
 
 # add es locales
 rm ./locale/es.po
+rm ./locale/de.po
 cd locale
 cp ../../locale/es.po .
+cp ../../locale/de.po .
 cd ..
 
 npm install grunt-po2json

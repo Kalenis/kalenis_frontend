@@ -221,13 +221,13 @@ class VListView extends PureComponent {
       await ws.Post('model.' + 'ir.ui.view_tree_width' + '.set_width', [model_name, fields], this.props.session)
 
 
+      // No cache on sao 5.0
+      // this.props.session.cache.clear('model.' + model_name + '.fields_view_get')
 
-      this.props.session.cache.clear('model.' + model_name + '.fields_view_get')
-
-      if (this.props.type != 'list_view') {
-        //if tree view on o2m or m2m2: clear parents view cache
-        this.props.session.cache.clear('model.' + this.props.field_instance.model_name + '.fields_view_get')
-      }
+      // if (this.props.type != 'list_view') {
+      //   //if tree view on o2m or m2m2: clear parents view cache
+      //   this.props.session.cache.clear('model.' + this.props.field_instance.model_name + '.fields_view_get')
+      // }
 
     }
 
@@ -243,9 +243,8 @@ class VListView extends PureComponent {
     this.props.columns.unshift([])
     this.props.allColumns.unshift([])
     this.setColumnWidth()
-    this.props.currentScreen.current_record = null;
+    this.props.currentScreen.set_current_record(null);
     this.props.currentScreen.current_view.set_selected_records([])
-    // this.props.currentScreen.limit = 200;
     this.getHeight();
 
 
@@ -490,33 +489,7 @@ class VListView extends PureComponent {
         selected_records.push(this.props.currentScreen.current_record)
 
       }
-      // else {
-      //   //set default focus to 0
-
-      //   if (!this.props.editable) {
-      //     scrollTo = 0
-      //     selected_index.push(scrollTo)
-      //     selected_records.push(this.props.group[0])
-      //     this.props.currentScreen.current_record = this.props.group[0];
-      //     this.props.currentScreen.current_view.set_selected_records(selected_records)
-      //   }
-
-      //   else {
-      //     if (selected_index.length > 0) {
-      //       selected_index.map(function (i) {
-      //         selected_records.push(this.props.group[i])
-      //       }.bind(this))
-      //     }
-      //     this.props.currentScreen.current_record = selected_records[this.props.group[selected_index[selected_index.length]]];
-      //     this.props.currentScreen.current_view.set_selected_records(selected_records)
-
-      //   }
-      //   // this.props.currentScreen.current_view.set_selected_records(selected_records)
-
-
-
-      // }
-
+      
     }
 
     
@@ -542,7 +515,7 @@ class VListView extends PureComponent {
           this.props.currentScreen.current_view.set_selected_records(records_selection)
 
           //Update current record on SAO when selection is recovered
-          this.props.currentScreen.current_record = records_selection[0]
+          this.props.currentScreen.set_current_record(records_selection[0])
           this.setState({
             currentRecord: records_selection[0]
           })
@@ -552,7 +525,6 @@ class VListView extends PureComponent {
         }
 
         this.view_refs.infinite_loader._registeredChild.forceUpdate()
-        //  if (this._loadMoreRowsStartIndex != 0) {
         var columnIndex = 0;
         if (this.state.ordered_column.index) {
           columnIndex = this.state.ordered_column.index
@@ -783,45 +755,14 @@ class VListView extends PureComponent {
                 currentScreen={this.props.currentScreen} />
             </span> : ""
           }
-          {/* <span style={{ textOverflow: 'ellipsis', overflow: 'hidden' }}>Footer</span>
-          
-          <Draggable
-            axis='x'
-            defaultClassName='DragHandle'
-            defaultClassNameDragging='DragHandleActive'
-
-            onStop={(event, data) => this.onResizeStop({
-
-              columnIndex: columnIndex,
-
-            })}
-
-            onDrag={(event, data) => this.resizeColumn({
-              deltaX: data.x,
-              columnIndex: columnIndex,
-              lastX: data.lastX,
-            })}
-            position={{
-              x: 0,
-              y: 0
-            }}
-            zIndex={999}
-          >
-            <div className='DragHandleIcon'>
-
-              <FontAwesomeIcon icon={faGripLinesVertical} />
-            </div>
-          </Draggable> */}
 
         </div>
 
-        {/* <FontAwesomeIcon style={{ color: "rgb(40,80,146)", marginLeft:'2px' }} icon={faAngleDoubleDown} /> */}
 
 
       </div>
     )
 
-    // return this.renderLeftHeaderCell({columnIndex, key, rowIndex, style});
   }
   //EndFooterRender
 
@@ -863,7 +804,7 @@ class VListView extends PureComponent {
     this.props.currentScreen.current_view.set_selected_records(selected_records)
 
 
-    this.props.currentScreen.current_record = record
+    this.props.currentScreen.set_current_record(record)
     //5.2 set_current_record is not a function anymore
   }
 
@@ -963,12 +904,12 @@ class VListView extends PureComponent {
         return (<input type="checkbox" key={key + '_child'} checked={value} readOnly />)
       }
       case 'many2one': {
-        // Migration 5.2:changed structure from column.rec_name to the following:
-        const column_name = column.attributes.name.concat('.')
+        // Migration 5.0: The .rec_name its the value, not an object
+        const column_name = column.attributes.name.concat('.rec_name')
 
-        if (this.props.group[rowIndex]._values[column_name] && this.props.group[rowIndex]._values[column_name].rec_name !== undefined) {
+        if (this.props.group[rowIndex]._values[column_name]) {
 
-          return this.props.group[rowIndex]._values[column_name].rec_name
+          return this.props.group[rowIndex]._values[column_name]
 
 
         }
@@ -1068,14 +1009,8 @@ class VListView extends PureComponent {
       case 'reference': {
 
         if (value) {
-
-
           var selection = []
           var model_name = "";
-
-
-
-
           if (Array.isArray(column.field.description.selection)) {
 
             column.field.description.selection.map(function (pair) {
@@ -1086,7 +1021,7 @@ class VListView extends PureComponent {
           }
 
 
-          return model_name + ',' + this.props.group[rowIndex]._values[column.attributes.name.concat('.')].rec_name
+          return model_name + ',' + this.props.group[rowIndex]._values[column.attributes.name.concat('.rec_name')]
         }
         else { return "" }
       }
@@ -1500,7 +1435,8 @@ class VListView extends PureComponent {
     e.preventDefault();
     e.stopPropagation();
     // this.setRecoverScroll(rowIndex)
-    this.props.currentScreen.current_record = this.props.group[rowIndex]
+    // this.props.currentScreen.current_record = this.props.group[rowIndex]
+    this.props.currentScreen.set_current_record(this.props.group[rowIndex])
     this.props.currentScreen.current_view.set_selected_records([this.props.group[rowIndex]])
     let selected_index = []
     selected_index.push(rowIndex)
@@ -1526,7 +1462,8 @@ class VListView extends PureComponent {
   handleContextMenu(e, rowIndex, columnIndex) {
     e.preventDefault()
 
-    this.props.currentScreen.current_record = this.props.group[rowIndex]
+    // this.props.currentScreen.current_record = this.props.group[rowIndex]
+    this.props.currentScreen.set_current_record(this.props.group[rowIndex])
 
     this.setState({ contextOpen: true, currentRecord: this.props.group[rowIndex] })
     contextMenu.show({
@@ -1754,7 +1691,8 @@ class VListView extends PureComponent {
 
 
     this.props.currentScreen.current_view.set_selected_records(selected_records)
-    this.props.currentScreen.current_record = selected_records[0]
+    
+    this.props.currentScreen.set_current_record(selected_records[0])
 
     this.setState({
       toogleAll: !this.state.toogleAll,
@@ -1773,7 +1711,8 @@ class VListView extends PureComponent {
         selected_index: selected_index,
         currentRecord: record
       })
-      this.props.currentScreen.current_record = record
+      // this.props.currentScreen.current_record = record
+      this.props.currentScreen.set_current_record(record)
       this.props.currentScreen.current_view.set_selected_records(selected_records)
       this.view_refs.infinite_loader._registeredChild.forceUpdate()
     }
@@ -1816,7 +1755,9 @@ class VListView extends PureComponent {
           return singleSelect()
         }
         // var record = this.props.group[rowIndex]
-        let selected_records = [...this.props.currentScreen.current_view.selected_records]
+        // let selected_records = [...this.props.currentScreen.current_view.selected_records]
+        //No getters on 5.0, access records_selection
+        let selected_records = [...this.props.currentScreen.current_view.records_selection]
         let selected_index = [...this.state.selected_index]
         var included = selected_index.includes(rowIndex)
 
@@ -1864,7 +1805,8 @@ class VListView extends PureComponent {
           }
 
           //5.2 set_current_record is not a function anymore
-          this.props.currentScreen.current_record = record
+          // this.props.currentScreen.current_record = record
+          this.props.currentScreen.set_current_record(record)
 
         }
         else {
@@ -1882,12 +1824,14 @@ class VListView extends PureComponent {
             if (this.props.currentScreen.current_record) {
               if (this.props.currentScreen.current_record === record) {
 
-                this.props.currentScreen.current_record = null
+                // this.props.currentScreen.current_record = null
+                this.props.currentScreen.set_current_record(null)
               }
 
               else if (selected_records.length === 0) {
 
-                this.props.currentScreen.current_record = null
+                // this.props.currentScreen.current_record = null
+                this.props.currentScreen.set_current_record(null)
               }
             }
           }
@@ -2897,7 +2841,7 @@ class VListView extends PureComponent {
     } = this.state;
 
     const rowHeight = this.props.rowHeight
-    const headerHeight = this.props.rowHeight
+    const headerHeight = 40
 
     const columnCount = this.props.columns.length
     var rowCount = this.props.group.length

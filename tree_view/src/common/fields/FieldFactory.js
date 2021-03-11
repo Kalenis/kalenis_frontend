@@ -163,6 +163,10 @@ class FieldFactory extends Component {
     switch (this.props.widget) {
 
       case 'many2one':
+        const value = {
+          'id':this.props.record._values[this.props.field.name],
+          'rec_name':this.props.record._values[this.props.field.name.concat('.rec_name')]
+        }
         return (
           <M2OField
             states={this.props.cell_state}
@@ -177,7 +181,7 @@ class FieldFactory extends Component {
             record={this.props.record}
             setValue={this.setFieldValue}
             // value={this.props.record._values[this.props.field.name]} 
-            value={this.props.record._values[this.props.field.name.concat('.')] || {}}
+            value={value || {}}
             compact={this.props.compact}
           />
 

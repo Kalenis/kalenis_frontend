@@ -6,9 +6,12 @@ const Sao = window.Sao;
 export const formatNumber = (value, digits, factor) => {
     let options = {}
     let lang = Sao.i18n.BC47(Sao.i18n.getlang())
-    if(Sao.i18n.locale.decimal_point === '.'){
-        lang = 'en'
+    if(Sao.i18n.locale){
+        if(Sao.i18n.locale.decimal_point === '.'){
+            lang = 'en'
+        }
     }
+    
     
 
     if(digits){

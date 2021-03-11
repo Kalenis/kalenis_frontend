@@ -116,7 +116,9 @@ body{
     color:white !important;
 } */
 
-.toolbar{
+
+/* toolbar classname has been renamed avoiding jQuery resize */
+.toolbar_default{
     /* background-color:rgb(36,126,182) !important; */
     background-color:var(--primary-color);
     box-shadow:0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12);
@@ -452,3 +454,8 @@ body{
 .invisible {
     display:none;
 }
+
+/* 5.0 backport */
+/* .tab-form nav.toolbar.affix, .tab-board nav.toolbar.affix{
+    top:0px !important;
+} */

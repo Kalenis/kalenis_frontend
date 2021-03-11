@@ -67,7 +67,13 @@ class ReferenceField extends PureComponent {
        
      
      model = this.props.record._values[this.props.field.name][0];
-     value = this.props.record._values[this.props.field.name.concat('.')]
+    //  value = this.props.record._values[this.props.field.name.concat('.')]
+    value = {
+            'id':this.props.record._values[this.props.field.name][1], 
+            'rec_name':this.props.record._values[this.props.field.name.concat('.rec_name')]
+          }
+
+
      
     //  console.log("Value for m2o from reference")
     //  console.log(value)

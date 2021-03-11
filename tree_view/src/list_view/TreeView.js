@@ -109,15 +109,6 @@ class TreeView extends PureComponent {
 
 
 
-    //ORIGINAL
-    // 
-
-
-    // let t1= performance.now()
-
-    // console.log("Call setColumns took " + (t1 - t0) + " milliseconds.");
-
-
     if (this.props.sao_props.screen.screen_container.tab_domain.length > 0) {
       this.setState({ tab_domain: true })
     }
@@ -231,7 +222,6 @@ class TreeView extends PureComponent {
 
 
     if (JSON.stringify(this.props.sao_props.domain) != JSON.stringify(prevProps.sao_props.domain)) {
-      // if(this.props.sao_props.domain != prevProps.sao_props.domain){
 
       this.updateColumnsDomain(this.props.sao_props.domain)
 
@@ -241,7 +231,9 @@ class TreeView extends PureComponent {
       let filter_fields = this.getFilterFields()
       this.props.sao_props.screen.domain_parser.fields = {};
       this.props.sao_props.screen.screen_container.search_modal = false;
-      this.props.sao_props.screen.domain_parser.update_fields(filter_fields);
+      let domain_parser = this.props.sao_props.screen.domain_parser()
+      domain_parser.update_fields(filter_fields)
+      
     }
 
 
@@ -253,12 +245,6 @@ class TreeView extends PureComponent {
       }
 
     }
-
-
-
-
-
-
 
 
   }
@@ -1136,6 +1122,7 @@ class TreeView extends PureComponent {
               // screen={this.props.sao_props.screen}
               records_qty ={this.props.sao_props.screen.limit}
               changeViewLimit = {this.changeViewLimit}
+              board_child = {this.props.sao_props.screen.board_child}
             />
           </Portal>
           :
@@ -1162,7 +1149,7 @@ class TreeView extends PureComponent {
               updateColumn={this.updateColumn}
               unique_columns={this.state.unique_columns}
               drag_sortable={this.state.drag_sortable}
-              rowHeight={this.state.rowHeight}
+              rowHeight={parseInt(this.state.rowHeight)}
               setModified={this.setCurrentModified}
               current_view={this.state.current_view}
               list_view_style={this.state.list_style}
