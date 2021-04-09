@@ -79,8 +79,12 @@ Sao.View.KalenisTree = Sao.class_(Sao.View, {
         else{
             this.view_context = 'list_view';
         }
+        if (this.screen.attributes.board_child){
+            this.el.uniqueId();
+            this.el.attr('id', this.el.attr('id').concat('_addon'));
+        }
 
-        if (this.screen.tab) {
+        else if (this.screen.tab) {
             this.el.attr('id', this.screen.tab.id + '_addon');
         }
         else if (this.field_name) {

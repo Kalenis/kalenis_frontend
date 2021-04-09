@@ -1136,6 +1136,7 @@ class TreeView extends PureComponent {
               // screen={this.props.sao_props.screen}
               records_qty ={this.props.sao_props.screen.limit}
               changeViewLimit = {this.changeViewLimit}
+              board_child = {this.props.sao_props.screen.board_child}
             />
           </Portal>
           :

@@ -452,3 +452,44 @@ body{
 .invisible {
     display:none;
 }
+
+.infobar{
+    left:-50px !important;
+    width:20%;
+    animation-name: slide;
+    transform:none;
+    min-width: 0px;
+	animation-iteration-count: 1;
+	animation-timing-function: ease-in;
+	animation-duration: 0.2s;
+    animation-fill-mode: forwards;
+}
+
+@keyframes slide {
+	0% {
+		transform: translate(-90%);
+	}
+	100% {
+		transform: translateX(20%)
+	}
+}
+
+/* Board rules */
+
+.panel-heading-board{
+    background-color:transparent;
+    color: #999;
+    font-size:16px;
+    background:white;
+    padding:5px;
+    padding-left:10px;
+}
+.panel-board{
+    background:white !important;
+    border:0.1px solid #9999 !important
+}
+
+.panel-body-board{
+    padding:10px;
+    padding-right:15px;
+}
