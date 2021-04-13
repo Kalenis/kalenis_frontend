@@ -935,6 +935,8 @@ Sao.View.Form.One2Many.prototype.init = function (view, attributes) {
     this._required = false;
     this._position = 0;
     this._length = 0;
+    
+    
 
     this.el = jQuery('<div/>', {
         'class': this.class_ + ' panel panel-default'
@@ -1109,6 +1111,10 @@ Sao.View.Form.One2Many.prototype.init = function (view, attributes) {
     });
     this.el.append(this.content);
 
+    var decoder = new Sao.PYSON.Decoder();
+    var ctx = decoder.decode(attributes.context);
+    
+
     var modes = (attributes.mode || 'tree,form').split(',');
     this.screen = new Sao.Screen(attributes.relation, {
         mode: modes,
@@ -1122,6 +1128,7 @@ Sao.View.Form.One2Many.prototype.init = function (view, attributes) {
         field_type: 'o2m',
         field_name: this.el.attr('id'),
         field_instance: this,
+        context:view.screen.context.dynamic_fields ? ctx:{}
 
     });
     this.screen.pre_validate = attributes.pre_validate == 1;
@@ -1998,6 +2005,7 @@ Sao.Screen.prototype.init = function (model_name, attributes) {
     this.offset = 0;
     this.order = this.default_order = attributes.order;
     var access = Sao.common.MODELACCESS.get(model_name);
+    
 
     if (!(access.write || access.create)) {
         this.attributes.readonly = true;
@@ -2050,6 +2058,160 @@ Sao.Screen.prototype.init = function (model_name, attributes) {
     // domain_parser.
 };
 
+Sao.Screen.prototype.button =  function(attributes) {
+    var ids;
+    console.log("INHERITED => Press Button => i will reload");
+
+    var process_action = function(action) {
+        //prevent reload if action is full_reload
+        if(action == 'full_reload'){
+            return this.client_action(action);
+        }
+        return this.reload(ids, true).then(function() {
+            if (typeof action == 'string') {
+                this.client_action(action);
+            }
+            else if (action) {
+                Sao.Action.execute(action, {
+                    model: this.model_name,
+                    id: this.current_record.id,
+                    ids: ids
+                }, null, this.context, true);
+            }
+        }.bind(this));
+    };
+
+    var selected_records = this.current_view.selected_records;
+    this.current_view.set_value();
+    var fields = this.current_view.get_fields();
+
+    var prms = [];
+    var reset_state = function(record) {
+        return function() {
+            this.display(true);
+            // Reset valid state with normal domain
+            record.validate(fields);
+        }.bind(this);
+    }.bind(this);
+    for (var i = 0; i < selected_records.length; i++) {
+        var record = selected_records[i];
+        var domain = record.expr_eval(
+            (attributes.states || {})).pre_validate || [];
+        prms.push(record.validate(fields, false, domain));
+    }
+    return jQuery.when.apply(jQuery, prms).then(function() {
+        var record;
+        for (var i = 0; i < selected_records.length; i++) {
+            record = selected_records[i];
+            var result = arguments[i];
+            if (result) {
+                continue;
+            }
+            Sao.common.warning.run(
+                    this.invalid_message(record),
+                    Sao.i18n.gettext('Pre-validation'))
+                .then(reset_state(record));
+            return;
+        }
+        var prm = jQuery.when();
+        if (attributes.confirm) {
+            prm = Sao.common.sur.run(attributes.confirm);
+        }
+        return prm.then(function() {
+            var record = this.current_record;
+            if (attributes.type === 'instance') {
+                var args = record.expr_eval(attributes.change || []);
+                var values = record._get_on_change_args(args);
+                return record.model.execute(attributes.name, [values],
+                    this.context).then(function(changes) {
+                    record.set_on_change(changes);
+                    record.group.root_group.screens.forEach(
+                        function(screen) {
+                            screen.display();
+                    });
+                });
+            } else {
+                return record.save(false).then(function() {
+                    var context = this.context;
+                    context._timestamp = {};
+                    ids = [];
+                    for (i = 0; i < selected_records.length; i++) {
+                        record = selected_records[i];
+                        jQuery.extend(context._timestamp,
+                            record.get_timestamp());
+                        ids.push(record.id);
+                    }
+                    return record.model.execute(attributes.name,
+                        [ids], context)
+                        .then(process_action.bind(this))
+                        .fail(function() {
+                            return this.reload(ids, true);
+                        }.bind(this));
+                }.bind(this));
+            }
+        }.bind(this));
+    }.bind(this));
+};
+
+Sao.Screen.prototype.client_action = function(action) {
+    var access = Sao.common.MODELACCESS.get(this.model_name);
+    if (action == 'new') {
+        if (access.create) {
+            this.new_();
+        }
+    } else if (action == 'delete') {
+        if (access['delete']) {
+            this.remove(!this.group.parent, false, !this.group.parent);
+        }
+    } else if (action == 'remove') {
+        if (access.write && access.read && this.group.parent) {
+            this.remove(false, true, false);
+        }
+    } else if (action == 'copy') {
+        if (access.create) {
+            this.copy();
+        }
+    } else if (action == 'next') {
+        this.display_next();
+    } else if (action == 'previous') {
+        this.display_previous();
+    } else if (action == 'close') {
+        Sao.Tab.close_current();
+    } else if (action.startsWith('switch')) {
+        this.switch_view.apply(this, action.split(' ', 3).slice(1));
+    } else if (action == 'reload') {
+        if (~['tree', 'graph', 'calendar'].indexOf(this.current_view.view_type) &&
+                !this.group.parent) {
+            this.search_filter();
+        }
+    } else if (action == 'reload menu') {
+        Sao.Session.current_session.reload_context()
+            .then(function() {
+                Sao.menu();
+            });
+    } else if (action == 'reload context') {
+        Sao.Session.current_session.reload_context();
+    }
+    else if (action == 'full_reload'){
+        
+        this.add_view_id(this.current_view.view_id, this.current_view.view_type,true).then(function(){
+            this.current_view = this.views[this.views.length - 1];
+            this.screen_container.set(this.current_view.el);
+            this.display().done(function () {
+                this.set_cursor();
+                if (this.switch_callback) {
+                    this.switch_callback();
+                }
+            }.bind(this));
+            this.reload([this.current_record.id], true);
+        }.bind(this));
+        // this.switch_view('form').then(function(){
+        //     this.reload([],true);
+        // }.bind(this));
+
+    }
+};
+
 Sao.Screen.prototype.switch_view = function (view_type, view_id) {
     if ((view_id !== undefined) && (view_id !== null)) {
         view_id = Number(view_id);
@@ -2084,7 +2246,20 @@ Sao.Screen.prototype.switch_view = function (view_type, view_id) {
             }
         }
 
-
+        //Dynamic Fields: Reload form view each time
+        if(this.context.dynamic_fields){
+            console.log("VIEW_TO_LOAD ON SWITCH");
+            console.log("VIEW TYPE");
+            console.log(view_type);
+            if(view_type == 'form'){
+                if(!this.view_to_load.includes('form')){
+                    console.log("Adding form to view to load");
+                    this.view_to_load.push('form');
+                }
+            }
+            
+            
+        }
 
         this.current_view.set_value();
         if (this.current_record &&
@@ -2097,6 +2272,7 @@ Sao.Screen.prototype.switch_view = function (view_type, view_id) {
             !this.current_record.validate(
                 fields, false, false, true)) {
             this.screen_container.set(this.current_view.el);
+            console.log("Returning direct display");
             return this.current_view.display().done(function () {
                 this.set_cursor();
             }.bind(this));
@@ -2150,7 +2326,6 @@ Sao.Screen.prototype.switch_view = function (view_type, view_id) {
         };
 
         while (!found()) {
-
             if (this.view_to_load.length) {
                 return this.load_next_view().then(switch_current_view);
             } else if ((view_id !== null) &&
@@ -2170,6 +2345,55 @@ Sao.Screen.prototype.switch_view = function (view_type, view_id) {
         return set_container();
     }.bind(this);
     return _switch();
+};
+
+Sao.Screen.prototype.add_view_id =  function(view_id, view_type, no_cache) {
+    var new_context = false;
+    
+    console.log("ADDING VIEW ID");
+    console.log(this.context);
+
+    if(this.context.dynamic_fields){
+        if(this.current_record){
+            console.log("ADDING VIEW ID => With Record");
+            console.log(this.current_record.id);
+            console.log(this.context);
+            // this.context.r_id = this.current_record.id;
+            new_context = jQuery.extend({}, this.context);
+            new_context.r_id = this.current_record.id;
+            new_context.no_cache = no_cache;
+        }
+    }
+    
+    var view;
+    var prm = false;
+    if(this.context.dynamic_fields && new_context){
+        console.log("Requesting fields_view_get (first condition)");
+        console.log(new_context);
+        prm = this.model.execute('fields_view_get',
+        [view_id, view_type], new_context);
+        
+    }
+    
+    else if (view_id && this.views_preload[String(view_id)]) {
+        view = this.views_preload[String(view_id)];
+    } else if (!view_id && this.views_preload[view_type]) {
+        view = this.views_preload[view_type];
+    } else {
+        
+        
+        prm = this.model.execute('fields_view_get',
+        [view_id, view_type], this.context);
+        
+        
+        // return prm.pipe(this.add_view.bind(this));
+    }
+    if(prm){
+        return prm.pipe(this.add_view.bind(this));
+    }
+
+    this.add_view(view);
+    return jQuery.when();
 };
 
 

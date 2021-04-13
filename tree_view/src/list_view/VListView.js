@@ -247,6 +247,10 @@ class VListView extends PureComponent {
     this.props.currentScreen.current_view.set_selected_records([])
     // this.props.currentScreen.limit = 200;
     this.getHeight();
+    console.log("MOUNT")
+    console.log(this.state.selected_index)
+    console.log("SELECTED RECORDS")
+    console.log(this.props.currentScreen.current_view.selected_records)
 
 
   }
@@ -307,6 +311,8 @@ class VListView extends PureComponent {
         this.setState({
           currentRecord: this.props.currentScreen.current_record
         })
+        console.log("Changing Selection from update")
+        console.log(this.props.currentScreen.current_record)
         this.changeSelection(false, this.props.group.indexOf(this.props.currentScreen.current_record), true)
 
       }
@@ -364,7 +370,12 @@ class VListView extends PureComponent {
         }
         
         
-
+        console.log("Calling reset Grid")
+        console.log(cleanSelection)
+        console.log(this.state.selected_index)
+        console.log(this.props.currentScreen.current_view.selected_records)
+        console.log(this.props.currentScreen.current_record)
+        console.log("----end did update--------")
 
         this.resetGrid(focusRecord, cleanSelection)
 
@@ -946,6 +957,7 @@ class VListView extends PureComponent {
 
       )
     }
+    
 
     switch (column.attributes.widget) {
 
@@ -1012,8 +1024,11 @@ class VListView extends PureComponent {
       case 'timedelta': {
         if (value) {
           var converter = column.field.converter(this.props.currentScreen);
-
-          return window.Sao.common.timedelta.format(window.Sao.TimeDelta(null, value.asSeconds()), converter);
+          
+          value = window.Sao.common.timedelta.format(window.Sao.TimeDelta(null, value.asSeconds()), converter);
+          console.log("VALUE ON TIME DELTA")
+          console.log(value)
+          return value;
           // return window.Sao.common.timedelta.format(value) 
         }
         else { return "" }
@@ -1775,6 +1790,9 @@ class VListView extends PureComponent {
       })
       this.props.currentScreen.current_record = record
       this.props.currentScreen.current_view.set_selected_records(selected_records)
+      console.log("------------------Changing Selection-------------")
+      console.log(selected_index)
+      console.log(this.props.currentScreen.current_view.selected_records)
       this.view_refs.infinite_loader._registeredChild.forceUpdate()
     }
 
