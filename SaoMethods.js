@@ -1110,9 +1110,12 @@ Sao.View.Form.One2Many.prototype.init = function (view, attributes) {
         'class': this.class_ + '-content panel-body'
     });
     this.el.append(this.content);
-
-    var decoder = new Sao.PYSON.Decoder();
-    var ctx = decoder.decode(attributes.context);
+    var ctx = {};
+    if(attributes.context){
+        var decoder = new Sao.PYSON.Decoder();
+        ctx = decoder.decode(attributes.context);
+    }
+    
     
 
     var modes = (attributes.mode || 'tree,form').split(',');
