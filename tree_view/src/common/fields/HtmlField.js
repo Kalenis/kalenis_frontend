@@ -377,6 +377,7 @@ bullist numlist outdent indent | removeformat | help'
 
             
             editorRef.current.editor.setContent(getValue())
+            editorRef.current.editor.undoManager.clear()
 
             initAttachs()
 
