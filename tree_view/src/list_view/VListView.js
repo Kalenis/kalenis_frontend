@@ -999,7 +999,11 @@ class VListView extends PureComponent {
 
       }
       case 'datetime': {
-        if (value) { return moment(value).format('DD-MM-YYYY-hh:mm:ss') }
+        if (value) { 
+          return moment(value).format('DD-MM-YYYY-HH:MM:SS') 
+          
+        }
+        break;
       }
       case 'time': {
         // if (value) { return moment(value).format('hh:mm:ss') }
