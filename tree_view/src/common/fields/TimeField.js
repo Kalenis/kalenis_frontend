@@ -20,31 +20,42 @@ function TimeField(props) {
     }
 
     function setWidgetValue() {
-
-        let value = timeToWidget()
+        let value = ""
+        if(props.value){
+            value = Sao.common.format_time(props.field.time_format(props.record), moment(props.value))
+        }
+        
         return value;
 
     }
 
 
     function parseTime(value){
-        return Sao.common.parse_time(props.field.time_format(props.record), value)
+        // Use default SAO time format
+        let format = '%H:%M:%S'
+        let v = Sao.common.parse_time(format, value)
+        return v
+        
     }
 
     function setValue(value){
         props.setValue(parseTime(value))
     }
 
+    function default_format(date){
+        return date.format('HH:mm:ss')
+    }
+
     function getShortchutValue(key){
         
         switch(key){
-            case '=': return moment().format("HH:mm:ss");
-            case 's': return moment(props.value).add(1, 'seconds').format('HH:mm:ss')
-            case 'S': return moment(props.value).subtract(1, 'seconds').format('HH:mm:ss')
-            case 'i': return moment(props.value).add(1, 'minutes').format('HH:mm:ss')
-            case 'I': return moment(props.value).subtract(1, 'minutes').format('HH:mm:ss')
-            case 'h': return moment(props.value).add(1, 'hours').format('HH:mm:ss')
-            case 'H': return moment(props.value).subtract(1, 'hours').format('HH:mm:ss')
+            case '=': return moment();
+            case 's': return moment(props.value).add(1, 'seconds')
+            case 'S': return moment(props.value).subtract(1, 'seconds')
+            case 'i': return moment(props.value).add(1, 'minutes')
+            case 'I': return moment(props.value).subtract(1, 'minutes')
+            case 'h': return moment(props.value).add(1, 'hours')
+            case 'H': return moment(props.value).subtract(1, 'hours')
             default:return false;
         }
     }
@@ -53,9 +64,10 @@ function TimeField(props) {
         let sv = getShortchutValue(e.key)
         if(sv){
             e.preventDefault()
-            setValue(sv)
+            setValue(default_format(sv))
             return;
         }
+        
         return props.keyDownHandler(e, parseTime(value), force_nav, touched)
     }
 
@@ -82,6 +94,7 @@ function TimeField(props) {
                 callback={setValue}
                 readonly={props.states.readonly}
                 compact={props.compact}
+                format={props.field.time_format(props.record)}
             />
             
 

@@ -999,7 +999,14 @@ class VListView extends PureComponent {
 
       }
       case 'datetime': {
-        if (value) { return moment(value).format('DD-MM-YYYY-hh:mm:ss') }
+        if (value) { 
+          const df = column.field.date_format(this.props.group[rowIndex]);
+          
+          const tf = column.field.time_format(this.props.group[rowIndex])
+          
+          return window.Sao.common.format_datetime(df,tf,this.props.group[rowIndex]._values[column.field.name])
+          
+        }
       }
       case 'time': {
         // if (value) { return moment(value).format('hh:mm:ss') }
