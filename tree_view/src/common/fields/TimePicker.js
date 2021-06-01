@@ -72,6 +72,7 @@ function TimePicker(props) {
 
 
     const [options, setOptions] = useState([]);
+    const label_format = props.format.includes("A") ? "hh:mm A":"HH:mm"
 
     useEffect(() => {
         const hours = Array.from({
@@ -79,12 +80,16 @@ function TimePicker(props) {
         }, (_, hour) => moment({
             hour: Math.floor(hour / 2),
             minutes: (hour % 2 === 0 ? 0 : 30)
-        }).format('HH:mm')
+        })
         );
 
+
+
         let new_options = hours.map(function (hour) {
-            return { value: hour, label: hour }
+            
+            return { value: hour.format('HH:mm'), label: hour.format(label_format) }
         })
+        
         new_options.unshift({ value: now, label: "Now" })
         
         setOptions(new_options)
@@ -108,6 +113,7 @@ function TimePicker(props) {
         else {
             time = value.value
         }
+        
         props.callback(time)
 
     }

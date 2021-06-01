@@ -1982,6 +1982,27 @@ Sao.field.Float.prototype.get_client = function (record, factor) {
     }
 };
 
+function time_format(field,record){
+    var context = field.get_context(record);
+    var format = "";
+    
+    if (context.locale && context.locale.time) {
+        format = Sao.common.moment_format(context.locale.time);
+    }
+    else {
+        format = record.expr_eval(field.description.format);
+    }
+    return format;
+}
+
+Sao.field.DateTime.prototype.time_format = function (record){
+   
+    return time_format(this,record);
+};
+
+Sao.field.Time.prototype.time_format = function(record){
+    return time_format(this,record);
+};
 
 Sao.field.DateTime.prototype.set_client = function (record, value, force_change) {
 
