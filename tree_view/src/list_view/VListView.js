@@ -1565,7 +1565,7 @@ class VListView extends PureComponent {
     ordered_columns.map(function (column) {
       var selected_column = [...this.props.columns].slice(1, this.props.columns.length).filter(function (col) { return col.attributes.name === column })[0]
 
-      if (selected_column.attributes.widget != 'boolean') {
+      if (selected_column.attributes.widget != 'boolean' && selected_column.attributes.widget != 'text') {
         sortedValues[column] = this.formatValue(values[column], selected_column, rowIndex, rowIndex)
       }
       else {
