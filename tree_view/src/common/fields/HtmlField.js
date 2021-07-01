@@ -370,13 +370,19 @@ bullist numlist outdent indent | removeformat | help'
     }
 
     const [editorConfig, setEditorConfig] = useState(default_config)
+    
+
+    
 
     useEffect(() => {
 
+        
+        let value = getValue()
+        
         if (editorRef.current && editorRef.current.editor && editorReady) {
 
             
-            editorRef.current.editor.setContent(getValue())
+            editorRef.current.editor.setContent(value)
             editorRef.current.editor.undoManager.reset()
 
             initAttachs()
@@ -398,8 +404,7 @@ bullist numlist outdent indent | removeformat | help'
 
             }
         }
-    }, [props.sao_props.record, editorReady]);
-
+    }, [props.sao_props.value, editorReady]);
 
 
     useEffect(() => {
@@ -419,6 +424,7 @@ bullist numlist outdent indent | removeformat | help'
 
 
     });
+    
 
    
     useEffect(() => {

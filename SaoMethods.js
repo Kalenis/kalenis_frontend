@@ -1590,7 +1590,16 @@ Sao.View.Form.HTML.prototype.init = function (view, attributes) {
 
 Sao.View.Form.HTML.prototype.display = function () {
     Sao.View.Form.HTML._super.display.call(this);
-
+    var value = "";
+    if(this.field && this.field.description.name === 'diagnosis'){
+        
+        if(this.record){
+            value = this.record._values[this.field.description.name];
+            
+        }
+    }
+    
+    
 
     Sao.KalenisAddons.Components.createHtmlField({
         element: this.el[0], sao_props: {
@@ -1598,6 +1607,7 @@ Sao.View.Form.HTML.prototype.display = function () {
             record: this.record,
             attributes: this.attributes,
             screen: this.view.screen,
+            value:value
         }
     });
 
