@@ -340,6 +340,7 @@ function HtmlField(props) {
         inline: false,
         
         browser_spellcheck: true,
+        contextmenu:false,
         save_onsavecallback: () => { },
         menu: {
             file: { title: 'File', items: 'newdocument restoredraft | preview | print ' },
