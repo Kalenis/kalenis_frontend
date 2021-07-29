@@ -328,9 +328,12 @@ class VListView extends PureComponent {
       //###
       if (this.shouldReload(prevProps.group)) {
 
-        let focusRecord = prevProps.group.length < this.props.group.length
+
+          let focusRecord = prevProps.group.length < this.props.group.length
           && prevProps.group.length > 0
-          && this.props.currentScreen.screen_container.get_text() === this.state.currentFilter ? true : false
+          && this.props.currentScreen.screen_container.get_text() === this.state.currentFilter 
+          && this.state.selected_index.length ? true : false
+
 
           let cleanSelection = false
 
