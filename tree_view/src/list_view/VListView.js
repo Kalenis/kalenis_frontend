@@ -329,7 +329,10 @@ class VListView extends PureComponent {
 
         let focusRecord = prevProps.group.length < this.props.group.length
           && prevProps.group.length > 0
-          && this.props.currentScreen.screen_container.get_text() === this.state.currentFilter ? true : false
+          && this.props.currentScreen.screen_container.get_text() === this.state.currentFilter 
+          && this.state.selected_index.length ? true : false
+        
+        
         
         let cleanSelection = false
 
@@ -361,6 +364,7 @@ class VListView extends PureComponent {
               }
             })
           }
+          
         }
         
         
@@ -483,6 +487,7 @@ class VListView extends PureComponent {
 
       if (focusRecord) {
         selected_index = []
+        
         scrollTo = this.props.group.indexOf(this.props.currentScreen.current_record)
 
         selected_index.push(scrollTo)
