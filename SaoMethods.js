@@ -1029,77 +1029,77 @@ Sao.Window.Form.prototype.init = function (screen, callback, kwargs) {
 
 // /view/form.js
 
-Sao.View.Form.Date.prototype.init = function (view, attributes) {
-    Sao.View.Form.Date._super.init.call(this, view, attributes);
-    this.el = jQuery('<div/>', {
-        'class': this.class_
-    });
-    this.date = this.labelled = jQuery('<div/>', {
-        'class': ('input-group input-group-sm ' +
-            'input-icon input-icon-primary'),
-    }).appendTo(this.el);
-    Sao.common.ICONFACTORY.get_icon_img('tryton-date')
-        .appendTo(jQuery('<div/>', {
-            'class': 'datepickerbutton icon-input icon-primary',
-            'aria-label': Sao.i18n.gettext("Open the calendar"),
-            'title': Sao.i18n.gettext("Open the calendar"),
-        }).appendTo(this.date));
-    this.input = jQuery('<input/>', {
-        'type': 'text',
-        'class': 'form-control input-sm mousetrap'
-    }).appendTo(this.date);
-    this.date.datetimepicker({
-        'locale': moment.locale(),
-        'keyBinds': null,
-        'useCurrent': false,
-    });
-    this.date.css('max-width', this._width);
-    this.date.on('dp.change', this.focus_out.bind(this));
-    // We must set the overflow of the treeview and modal-body
-    // containing the input to visible to prevent vertical scrollbar
-    // inherited from the auto overflow-x
-    // (see http://www.w3.org/TR/css-overflow-3/#overflow-properties)
-    this.date.on('dp.hide', function () {
-        this.date.closest('.treeview').css('overflow', '');
-        this.date.closest('.modal-body').css('overflow', '');
-        this.date.closest('.form-group_').css('overflow', 'auto');
-        //kalenis: set overflow to content box, avoid y scroll on calendar
-        this.date.closest('.content-box').css('overflow', '');
-    }.bind(this));
-    this.date.on('dp.show', function () {
-        this.date.closest('.treeview').css('overflow', 'visible');
-        this.date.closest('.modal-body').css('overflow', 'visible');
-        this.date.closest('.form-group_').css('overflow', 'visible');
-        //kalenis: set overflow to content box, avoid y scroll on calendar
-        this.date.closest('.content-box').css('overflow', 'visible');
-    }.bind(this));
-    var mousetrap = new Mousetrap(this.el[0]);
+// Sao.View.Form.Date.prototype.init = function (view, attributes) {
+//     Sao.View.Form.Date._super.init.call(this, view, attributes);
+//     this.el = jQuery('<div/>', {
+//         'class': this.class_
+//     });
+//     this.date = this.labelled = jQuery('<div/>', {
+//         'class': ('input-group input-group-sm ' +
+//             'input-icon input-icon-primary'),
+//     }).appendTo(this.el);
+//     Sao.common.ICONFACTORY.get_icon_img('tryton-date')
+//         .appendTo(jQuery('<div/>', {
+//             'class': 'datepickerbutton icon-input icon-primary',
+//             'aria-label': Sao.i18n.gettext("Open the calendar"),
+//             'title': Sao.i18n.gettext("Open the calendar"),
+//         }).appendTo(this.date));
+//     this.input = jQuery('<input/>', {
+//         'type': 'text',
+//         'class': 'form-control input-sm mousetrap'
+//     }).appendTo(this.date);
+//     this.date.datetimepicker({
+//         'locale': moment.locale(),
+//         'keyBinds': null,
+//         'useCurrent': false,
+//     });
+//     this.date.css('max-width', this._width);
+//     this.date.on('dp.change', this.focus_out.bind(this));
+//     // We must set the overflow of the treeview and modal-body
+//     // containing the input to visible to prevent vertical scrollbar
+//     // inherited from the auto overflow-x
+//     // (see http://www.w3.org/TR/css-overflow-3/#overflow-properties)
+//     this.date.on('dp.hide', function () {
+//         this.date.closest('.treeview').css('overflow', '');
+//         this.date.closest('.modal-body').css('overflow', '');
+//         this.date.closest('.form-group_').css('overflow', 'auto');
+//         //kalenis: set overflow to content box, avoid y scroll on calendar
+//         this.date.closest('.content-box').css('overflow', '');
+//     }.bind(this));
+//     this.date.on('dp.show', function () {
+//         this.date.closest('.treeview').css('overflow', 'visible');
+//         this.date.closest('.modal-body').css('overflow', 'visible');
+//         this.date.closest('.form-group_').css('overflow', 'visible');
+//         //kalenis: set overflow to content box, avoid y scroll on calendar
+//         this.date.closest('.content-box').css('overflow', 'visible');
+//     }.bind(this));
+//     var mousetrap = new Mousetrap(this.el[0]);
 
-    mousetrap.bind('enter', function (e, combo) {
-        if (!this.date.find('input').prop('readonly')) {
-            this.date.data('DateTimePicker').date();
-        }
-    }.bind(this));
-    mousetrap.bind('=', function (e, combo) {
-        if (!this.date.find('input').prop('readonly')) {
-            e.preventDefault();
-            this.date.data('DateTimePicker').date(moment());
-        }
-    }.bind(this));
+//     mousetrap.bind('enter', function (e, combo) {
+//         if (!this.date.find('input').prop('readonly')) {
+//             this.date.data('DateTimePicker').date();
+//         }
+//     }.bind(this));
+//     mousetrap.bind('=', function (e, combo) {
+//         if (!this.date.find('input').prop('readonly')) {
+//             e.preventDefault();
+//             this.date.data('DateTimePicker').date(moment());
+//         }
+//     }.bind(this));
 
-    Sao.common.DATE_OPERATORS.forEach(function (operator) {
-        mousetrap.bind(operator[0], function (e, combo) {
-            if (this.date.find('input').prop('readonly')) {
-                return;
-            }
-            e.preventDefault();
-            var dp = this.date.data('DateTimePicker');
-            var date = dp.date();
-            date.add(operator[1]);
-            dp.date(date);
-        }.bind(this));
-    }.bind(this));
-};
+//     Sao.common.DATE_OPERATORS.forEach(function (operator) {
+//         mousetrap.bind(operator[0], function (e, combo) {
+//             if (this.date.find('input').prop('readonly')) {
+//                 return;
+//             }
+//             e.preventDefault();
+//             var dp = this.date.data('DateTimePicker');
+//             var date = dp.date();
+//             date.add(operator[1]);
+//             dp.date(date);
+//         }.bind(this));
+//     }.bind(this));
+// };
 Sao.View.Form.One2Many.prototype.init = function (view, attributes) {
     Sao.View.Form.One2Many._super.init.call(this, view, attributes);
 
@@ -3494,5 +3494,26 @@ Sao.Action.exec_action = function (action, data, context) {
 };
 
 //End Action.js
+
+Sao.Window.InfoBar.prototype.message = function(message, type) {
+
+    if (message) {
+        this.el.removeClass(
+                'alert-success alert-info alert-warning alert-danger');
+        this.el.addClass('alert-' + (type || 'info'));
+        this.text.text(message);
+        this.el.show();
+        if (type == 'info') {
+            this.el.delay(2000).fadeOut();
+        } 
+        else if (type == 'warning') {
+            this.el.delay(20000).fadeOut();
+        }
+
+    } else {
+        this.el.hide();
+    }
+};
+
 
 

@@ -8,6 +8,7 @@ module.exports = function(grunt) {
       'src/rpc.js',
       'src/pyson.js',
       'src/session.js',
+      'src/common.js',
       'src/model.js',
       'src/tab.js',
       'src/screen.js',
@@ -18,7 +19,6 @@ module.exports = function(grunt) {
       'src/view/calendar.js',
       'src/view/list_form.js',
       'src/action.js',
-      'src/common.js',
       'src/window.js',
       'src/wizard.js',
       'src/board.js',
@@ -29,6 +29,13 @@ module.exports = function(grunt) {
       '../SaoMethods.js',
       
   ];
+  var less_paths = [
+    'src',
+    'bower_components',
+    'bower_components/bootstrap',
+    'bower_components/bootstrap/less',
+    'bower_components/bootstrap-rtl-ondemand/less',
+];
 
   // Project configuration.
   grunt.initConfig({
@@ -103,19 +110,19 @@ module.exports = function(grunt) {
     less: {
         dev: {
             options: {
-                paths: ['src', 'bower_components/bootstrap/less']
+                paths: less_paths,
             },
             files: {
-                'dist/<%= pkg.name %>.css': 'src/*.less'
+                'dist/<%= pkg.name %>.css': 'src/sao.less'
             }
         },
         'default': {
             options: {
-                paths: ['src', 'bower_components/bootstrap/less'],
+                paths: less_paths,
                 yuicompress: true
             },
             files: {
-                'dist/<%= pkg.name %>.min.css': 'src/*.less'
+                'dist/<%= pkg.name %>.min.css': 'src/sao.less'
             }
         }
     },

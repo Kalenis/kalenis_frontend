@@ -453,3 +453,38 @@ body{
 .invisible {
     display:none;
 }
+
+input[type='checkbox'] {
+    margin-top: 0;
+    margin-left: auto;
+    margin-right: auto;
+    width:initial;
+}
+
+.infobar{
+    left:-50px !important;
+    top:10px !important;
+    font-size:1em;
+    width:20%;
+    animation-name: slide;
+    transform:none;
+    min-width: 0px;
+	animation-iteration-count: 1;
+	animation-timing-function: ease-in;
+	animation-duration: 0.2s;
+    animation-fill-mode: forwards;
+}
+
+@keyframes slide {
+	0% {
+		transform: translate(-90%);
+	}
+	100% {
+		transform: translateX(20%)
+	}
+}
+/* 
+.modal-header{
+    background-color: var(--primary-color);
+    color:white;
+} */

@@ -9,9 +9,15 @@ if test -f "./custom.css"; then
     rm ./custom.css
 fi
 
+if test -f "./custom.less"; then
+    rm ./custom.less
+fi
+
 if test -f "./custom.js"; then
     rm ./custom.js
 fi
+
+
 
 
 # theme=default
@@ -57,6 +63,7 @@ fi
 
 
 ln -s theme/$theme/custom.css 
+ln -s theme/$theme/custom.less 
 ln -s theme/$theme/index.html 
 ln -s theme/$theme/custom.js
 

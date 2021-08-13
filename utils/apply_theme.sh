@@ -9,6 +9,10 @@ if test -f "sao/custom.css"; then
     rm sao/custom.css
 fi
 
+if test -f "sao/custom.less"; then
+    rm sao/custom.less
+fi
+
 if test -f "sao/custom.js"; then
     rm sao/custom.js
 fi
@@ -58,6 +62,7 @@ fi
 cd sao
 
 ln -s ../theme/$theme/custom.css 
+ln -s ../theme/$theme/custom.less
 ln -s ../theme/$theme/index.html 
 ln -s ../theme/$theme/custom.js
 

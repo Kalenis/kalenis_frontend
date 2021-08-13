@@ -1,5 +1,5 @@
 #!/bin/sh
-# V5.6
+# V6.0
 cd ..
 
 if [ -d "./sao" ]; then
@@ -14,7 +14,7 @@ git clone https://github.com/tryton/sao.git
 
 cd sao
 
-git checkout 5.6
+git checkout 6.0
 rm ./Gruntfile.js 
 # ln -s ../Gruntfile.js
 cp ../Gruntfile.js .
@@ -28,10 +28,6 @@ cd ..
 npm install grunt-po2json
 npm install --production
 
-
-grunt
-
-
 #Create backup image folder
 mkdir original_images
 cp images/* original_images/
@@ -42,11 +38,18 @@ cd kalenis_views
 ln -s ../../importAddons.js
 ln -s ../../tree_view
 # ln -s ../importAddons.js
-
-cd ../..
-cd utils
-./apply_theme.sh kalenis
 cd ..
+cd ../utils/ 
+./apply_theme.sh kalenis
+cd ../sao
+
+grunt
+
+
+cd ..
+# cd utils
+# ./
+# cd ..
 cd tree_view
 npm install
 npm run build
