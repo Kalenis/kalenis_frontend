@@ -160,6 +160,34 @@ Sao.common.InputCompletion.prototype._set_selection = function (values) {
     }
 };
 
+Sao.common.UniqueDialog.prototype.run = function() {
+    console.log("INHERITED UNIQUE DIALOG RUN");
+    if (this.running) {
+        return jQuery.when();
+    }
+    var args = Array.prototype.slice.call(arguments);
+    var prm = jQuery.Deferred();
+    args.push(prm);
+    var dialog = this.build_dialog.apply(this, args);
+    dialog.content.submit(function(evt) {
+        dialog.footer.find('button.btn-primary').first().click();
+        evt.preventDefault();
+    }.bind(this));
+    this.running = true;
+    dialog.modal.modal('show');
+    dialog.modal.on('shown.bs.modal', function() {
+        dialog.modal.find('input,select')
+            .filter(':visible').first().focus();
+    });
+    dialog.modal.on('keydown', function(e) {
+        if (e.which == Sao.common.ESC_KEYCODE) {
+            this.close(dialog);
+            prm.reject();
+        }
+    }.bind(this));
+    return prm;
+};
+
 ////////////////END common.js ///////////
 
 //tab.js
@@ -3297,3 +3325,4 @@ Sao.Action.exec_action = function (action, data, context) {
 };
 
 //End Action.js
+
