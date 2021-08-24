@@ -3220,22 +3220,21 @@ Sao.View.Tree.Row.prototype.select_row = function (event_) {
 
 //Wizard.js
 
-Sao.Wizard.prototype.response = function (state) {
+
+Sao.Wizard.prototype.response = function(definition) {
     this.__waiting_response = false;
     this.screen.current_view.set_value();
-    return this.screen.current_record.validate().then(function (validate) {
-        if ((!validate) && state != this.end_state) {
-            this.screen.display(true);
-            this.info_bar.message(
-                this.screen.invalid_message(), 'danger');
-            //kalenis => return false to activate the submit button
-
-            return false;
-        }
-        this.info_bar.message();
-        this.state = state;
-        this.process();
-    }.bind(this));
+    if (definition.validate && !this.screen.current_record.validate(
+            null, null, null, true)) {
+        this.screen.display(true);
+        this.info_bar.message(
+            this.screen.invalid_message(), 'danger');
+        //kalenis => return false to activate the submit button
+        return false;
+    }
+    this.info_bar.message();
+    this.state = definition.state;
+    this.process();
 };
 
 Sao.Wizard.prototype.end = function() {
@@ -3248,16 +3247,17 @@ Sao.Wizard.prototype.end = function() {
     }.bind(this));
 };
 
-Sao.Wizard.Dialog.prototype._get_button = function (definition) {
+
+Sao.Wizard.Dialog.prototype._get_button = function(definition) {
     var button = Sao.Wizard.Dialog._super._get_button.call(this,
-        definition);
+            definition);
     this.footer.append(button.el);
     if (definition['default']) {
         this.content.unbind('submit');
-        this.content.submit(function (e) {
+        this.content.submit(function(e) {
             //Kalenis: Disable submit button while processing
             button.el.prop('disabled', true);
-            this.response(definition.state).then(function (res) {
+            this.response(definition).then(function (res) {
                 if (res === false) {
                     button.el.prop('disabled', false);
                 }
@@ -3266,9 +3266,9 @@ Sao.Wizard.Dialog.prototype._get_button = function (definition) {
         }.bind(this));
         button.el.attr('type', 'submit');
     } else {
-        button.el.click(function () {
+        button.el.click(function() {
             button.el.prop('disabled', true);
-            this.response(definition.state).then(function (res) {
+            this.response(definition).then(function (res) {
                 if (res === false) {
                     button.el.prop('disabled', false);
                 }
@@ -3277,6 +3277,8 @@ Sao.Wizard.Dialog.prototype._get_button = function (definition) {
     }
     return button;
 };
+
+
 
 Sao.Wizard.Dialog.prototype.show = function() {
     var view = this.screen.current_view;
