@@ -311,10 +311,12 @@ class TreeView extends PureComponent {
         let recovered_column = this.state.fields.filter(function (column) { if (column.attributes) { return column.attributes.name === unique } })[0]
 
 
-
-        recovered_column.unique = false;
-        columns.push(recovered_column)
-        update = true
+        if(recovered_column){
+          recovered_column.unique = false;
+          columns.push(recovered_column)
+          update = true
+        }
+        
       }.bind(this))
 
       uniques = [];

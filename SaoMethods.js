@@ -161,7 +161,6 @@ Sao.common.InputCompletion.prototype._set_selection = function (values) {
 };
 
 Sao.common.UniqueDialog.prototype.run = function() {
-    console.log("INHERITED UNIQUE DIALOG RUN");
     if (this.running) {
         return jQuery.when();
     }
