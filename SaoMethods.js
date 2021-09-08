@@ -3257,22 +3257,22 @@ Sao.Wizard.Dialog.prototype._get_button = function(definition) {
         this.content.submit(function(e) {
             //Kalenis: Disable submit button while processing
             button.el.prop('disabled', true);
-            this.response(definition).then(function (res) {
-                if (res === false) {
-                    button.el.prop('disabled', false);
-                }
-            });
+            var res = this.response(definition);
+            if(res===false){
+                button.el.prop('disabled', false);
+            }
+            
             e.preventDefault();
         }.bind(this));
         button.el.attr('type', 'submit');
     } else {
         button.el.click(function() {
             button.el.prop('disabled', true);
-            this.response(definition).then(function (res) {
-                if (res === false) {
-                    button.el.prop('disabled', false);
-                }
-            });
+            var res = this.response(definition);
+            if(res===false){
+                button.el.prop('disabled', false);
+            }
+            
         }.bind(this));
     }
     return button;
