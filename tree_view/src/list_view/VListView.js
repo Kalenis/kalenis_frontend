@@ -44,6 +44,7 @@ const fieldClasses = {
   many2one: 'charCell',
   date: 'charCell',
   datetime: 'charCell',
+  timestamp: 'charCell',
   time: 'charCell',
   timedelta: 'charCell',
   one2many: 'charCell',
@@ -1011,7 +1012,21 @@ class VListView extends PureComponent {
           
           const tf = column.field.time_format(this.props.group[rowIndex])
           
-          return window.Sao.common.format_datetime(df,tf,this.props.group[rowIndex]._values[column.field.name])
+          const date_time_format = df + ' ' + tf
+          
+          return window.Sao.common.format_datetime(date_time_format,this.props.group[rowIndex]._values[column.field.name])
+          
+        }
+      }
+      case 'timestamp': {
+        if (value) { 
+          const df = column.field.date_format(this.props.group[rowIndex]);
+          
+          const tf = column.field.time_format(this.props.group[rowIndex])
+          
+          const date_time_format = df + ' ' + tf
+          
+          return window.Sao.common.format_datetime(date_time_format,this.props.group[rowIndex]._values[column.field.name])
           
         }
       }
