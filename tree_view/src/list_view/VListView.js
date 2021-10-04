@@ -335,6 +335,7 @@ class VListView extends PureComponent {
         
         
         let cleanSelection = false
+        
 
         if(this.state.selected_index){
           
@@ -366,6 +367,7 @@ class VListView extends PureComponent {
           }
           
         }
+
         
         
 
@@ -476,7 +478,7 @@ class VListView extends PureComponent {
     let selected_records = []
     // let selected_index = []
     let selected_index = cleanSelection ?[]:[...this.state.selected_index]
-   
+    
     let scrollTo = 0
     
     this.view_refs.infinite_loader.resetLoadMoreRowsCache()
@@ -554,6 +556,13 @@ class VListView extends PureComponent {
           
 
 
+        }
+        else{
+          this.props.currentScreen.current_record = null
+          this.props.currentScreen.current_view.set_selected_records([])
+          this.setState({
+            currentRecord: {}
+          })
         }
 
         this.view_refs.infinite_loader._registeredChild.forceUpdate()
@@ -1781,11 +1790,18 @@ class VListView extends PureComponent {
   changeSelection(e, rowIndex, force_single) {
     var record = this.props.group[rowIndex]
     const setSelection = (selected_index, selected_records) => {
+      
+      const cr = !selected_records.length ? null:record
+      
+      this.props.currentScreen.current_record = cr
+      
+      
       this.setState({
         selected_index: selected_index,
-        currentRecord: record
+        currentRecord: cr ? cr:{}
       })
-      this.props.currentScreen.current_record = record
+
+      
       this.props.currentScreen.current_view.set_selected_records(selected_records)
       this.view_refs.infinite_loader._registeredChild.forceUpdate()
     }
