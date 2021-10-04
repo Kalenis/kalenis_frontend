@@ -558,11 +558,14 @@ class VListView extends PureComponent {
 
         }
         else{
-          this.props.currentScreen.current_record = null
-          this.props.currentScreen.current_view.set_selected_records([])
-          this.setState({
-            currentRecord: {}
-          })
+          if (this.props.currentScreen.current_view.view_context) {
+            this.props.currentScreen.current_record = null
+            this.props.currentScreen.current_view.set_selected_records([])
+            this.setState({
+              currentRecord: {}
+            })
+          }
+         
         }
 
         this.view_refs.infinite_loader._registeredChild.forceUpdate()
