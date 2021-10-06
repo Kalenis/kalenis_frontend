@@ -305,7 +305,6 @@ class VListView extends PureComponent {
     if (this.props.currentScreen.current_record) {
       if (this.props.currentScreen.current_record.id !== this.state.currentRecord.id
         && Object.keys(this.state.currentRecord).length) {
-        
         this.setState({
           currentRecord: this.props.currentScreen.current_record
         })
@@ -329,54 +328,52 @@ class VListView extends PureComponent {
       //###
       if (this.shouldReload(prevProps.group)) {
 
-
-          let focusRecord = prevProps.group.length < this.props.group.length
+        let focusRecord = prevProps.group.length < this.props.group.length
           && prevProps.group.length > 0
           && this.props.currentScreen.screen_container.get_text() === this.state.currentFilter 
           && this.state.selected_index.length ? true : false
+        
+        
+        
+        let cleanSelection = false
+        
 
-
-          let cleanSelection = false
-
-          if(this.state.selected_index){
-            
-            let prevIds = this.state.selected_index.map(function(i){
-              if(!prevProps.group[i]){
-                cleanSelection = true;
-                return false
-              }
-              return prevProps.group[i].id
-            })
-            let currentIds = this.state.selected_index.map(function(i){
-              if(!this.props.group[i]){
-                cleanSelection = true
-                return false
-              }
-              else{
-                return this.props.group[i].id
-              }
-              
-            }.bind(this))
-    
-            if(!cleanSelection){
-              
-              prevIds.forEach(function(i){
-                if(!currentIds.includes(i)){
-                  cleanSelection = true;
-                }
-              })
+        if(this.state.selected_index){
+          
+          let prevIds = this.state.selected_index.map(function(i){
+            if(!prevProps.group[i]){
+              cleanSelection = true;
+              return false
             }
+            return prevProps.group[i].id
+          })
+          let currentIds = this.state.selected_index.map(function(i){
+            if(!this.props.group[i]){
+              cleanSelection = true
+              return false
+            }
+            else{
+              return this.props.group[i].id
+            }
+            
+          }.bind(this))
+  
+          if(!cleanSelection){
+            
+            prevIds.forEach(function(i){
+              if(!currentIds.includes(i)){
+                cleanSelection = true;
+              }
+            })
           }
           
-          
-  
-  
-  
-          
-  
-          
-  
-          this.resetGrid(focusRecord, cleanSelection)
+        }
+
+        
+        
+
+
+        this.resetGrid(focusRecord, cleanSelection)
 
       }
       else {
@@ -413,7 +410,7 @@ class VListView extends PureComponent {
     }
 
     if(this.props.session.context.update_selected){
-
+      
       this.updateSelectedRecords()
       this.props.session.context.update_selected = false;
     }
@@ -482,7 +479,7 @@ class VListView extends PureComponent {
     let selected_records = []
     // let selected_index = []
     let selected_index = cleanSelection ?[]:[...this.state.selected_index]
-
+    
     let scrollTo = 0
     
     this.view_refs.infinite_loader.resetLoadMoreRowsCache()
@@ -493,6 +490,7 @@ class VListView extends PureComponent {
 
       if (focusRecord) {
         selected_index = []
+        
         scrollTo = this.props.group.indexOf(this.props.currentScreen.current_record)
 
         selected_index.push(scrollTo)
@@ -557,6 +555,18 @@ class VListView extends PureComponent {
             currentRecord: records_selection[0]
           })
           
+
+
+        }
+        else{
+          if (this.props.currentScreen.current_view.view_context) {
+            this.props.currentScreen.current_record = null
+            this.props.currentScreen.current_view.set_selected_records([])
+            this.setState({
+              currentRecord: {}
+            })
+          }
+         
         }
 
         this.view_refs.infinite_loader._registeredChild.forceUpdate()
@@ -581,8 +591,8 @@ class VListView extends PureComponent {
               //avoid to select the new record, just focus
               selected_index: []
             })
-
-
+            
+            
             this.props.currentScreen.current_view.set_selected_records([])
             this.view_refs.infinite_loader._registeredChild.scrollToCell({ columnIndex: columnIndex, rowIndex: scrollTo - 1 })
             this.focusInputCell(scrollTo, 1)
@@ -880,14 +890,14 @@ class VListView extends PureComponent {
       return;
     }
     let loadedRows = [...this.state.loadedRows]
-
+    
     this.state.selected_index.forEach(function(row){
       loadedRows.splice(loadedRows.indexOf(row), 1)
     })
     
     let startIndex = this.state.selected_index[0]
     let stopIndex = this.state.selected_index[this.state.selected_index.length-1]
-
+    
     
     this.setState({
       loadedRows: loadedRows,
@@ -1798,11 +1808,18 @@ class VListView extends PureComponent {
   changeSelection(e, rowIndex, force_single) {
     var record = this.props.group[rowIndex]
     const setSelection = (selected_index, selected_records) => {
+      
+      const cr = !selected_records.length ? null:record
+      
+      this.props.currentScreen.current_record = cr
+      
+      
       this.setState({
         selected_index: selected_index,
-        currentRecord: record
+        currentRecord: cr ? cr:{}
       })
-      this.props.currentScreen.current_record = record
+
+      
       this.props.currentScreen.current_view.set_selected_records(selected_records)
       this.view_refs.infinite_loader._registeredChild.forceUpdate()
     }
