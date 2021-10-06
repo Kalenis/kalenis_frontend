@@ -1591,7 +1591,7 @@ Sao.View.Form.HTML.prototype.init = function (view, attributes) {
 Sao.View.Form.HTML.prototype.display = function () {
     Sao.View.Form.HTML._super.display.call(this);
     var value = "";
-    if(this.field && this.field.description.name === 'diagnosis'){
+    if(this.field){
         
         if(this.record){
             value = this.record._values[this.field.description.name];
