@@ -7,6 +7,7 @@ import TabDomain from './TabDomain.js';
 import ws from '../common/ws.js';
 import Portal from '../common/Portal.js'
 import ViewManager from './ViewManager';
+import { ColumnSizer } from 'react-virtualized';
 
 // const currentSession = window.Sao.Session.current_session
 
@@ -230,7 +231,7 @@ class TreeView extends PureComponent {
 
     if (JSON.stringify(this.props.sao_props.domain) != JSON.stringify(prevProps.sao_props.domain)) {
       // if(this.props.sao_props.domain != prevProps.sao_props.domain){
-
+        
       this.updateColumnsDomain(this.props.sao_props.domain)
 
     }
@@ -322,10 +323,23 @@ class TreeView extends PureComponent {
       this.state.unique_columns.map(function (unique) {
         let recovered_column = this.state.fields.filter(function (column) { if (column.attributes) { return column.attributes.name === unique } })[0]
 
-
-
         recovered_column.unique = false;
-        columns.push(recovered_column)
+
+        
+        let idx = this.state.fields.indexOf(recovered_column)
+        
+        // Restore unique column in the right index
+        if(idx){
+          // When no user view applied, add 1 to idx to avoid first position bug.
+          if(this.state.current_view.id === 0){
+            idx+=1
+          }
+          columns.splice(idx,0,recovered_column)
+        }
+        else{
+          columns.push(recovered_column)
+        }
+        
         update = true
       }.bind(this))
 
