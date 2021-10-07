@@ -11,6 +11,7 @@ Sao.config.icon_colors = {
 
 };
 Sao.config.limit = 200;
+Sao.config.display_size= 40;
 
 //add Kalenis Addons
 Sao.KalenisAddons = {};
@@ -283,6 +284,13 @@ Sao.common.InputCompletion.prototype._set_selection = function (values) {
 ////////////////END common.js ///////////
 
 //tab.js
+
+Sao.Tab.prototype.set_name= function(name) {
+    var short_name = Sao.common.ellipsize(name.split(' / ').pop(), 20);
+    this.name = short_name;
+    this.name_el.text(short_name);
+    this.name_el.attr('title', name);
+};
 
 Sao.Tab.Form.prototype.init = function (model_name, attributes) {
     Sao.Tab.Form._super.init.call(this, attributes);
