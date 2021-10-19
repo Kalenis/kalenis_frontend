@@ -206,6 +206,9 @@ function ColumnManager(props) {
 
 
     }
+    if(column.field.description.selection){
+      default_attributes['selection'] = column.field.description.selection
+    }
 
     column.attributes = default_attributes
     column.sortable = column.field.description.sortable

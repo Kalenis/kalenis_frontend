@@ -330,47 +330,47 @@ class VListView extends PureComponent {
 
         let focusRecord = prevProps.group.length < this.props.group.length
           && prevProps.group.length > 0
-          && this.props.currentScreen.screen_container.get_text() === this.state.currentFilter 
+          && this.props.currentScreen.screen_container.get_text() === this.state.currentFilter
           && this.state.selected_index.length ? true : false
-        
-        
-        
-        let cleanSelection = false
-        
 
-        if(this.state.selected_index){
-          
-          let prevIds = this.state.selected_index.map(function(i){
-            if(!prevProps.group[i]){
+
+
+        let cleanSelection = false
+
+
+        if (this.state.selected_index) {
+
+          let prevIds = this.state.selected_index.map(function (i) {
+            if (!prevProps.group[i]) {
               cleanSelection = true;
               return false
             }
             return prevProps.group[i].id
           })
-          let currentIds = this.state.selected_index.map(function(i){
-            if(!this.props.group[i]){
+          let currentIds = this.state.selected_index.map(function (i) {
+            if (!this.props.group[i]) {
               cleanSelection = true
               return false
             }
-            else{
+            else {
               return this.props.group[i].id
             }
-            
+
           }.bind(this))
-  
-          if(!cleanSelection){
-            
-            prevIds.forEach(function(i){
-              if(!currentIds.includes(i)){
+
+          if (!cleanSelection) {
+
+            prevIds.forEach(function (i) {
+              if (!currentIds.includes(i)) {
                 cleanSelection = true;
               }
             })
           }
-          
+
         }
 
-        
-        
+
+
 
 
         this.resetGrid(focusRecord, cleanSelection)
@@ -409,8 +409,8 @@ class VListView extends PureComponent {
 
     }
 
-    if(this.props.session.context.update_selected){
-      
+    if (this.props.session.context.update_selected) {
+
       this.updateSelectedRecords()
       this.props.session.context.update_selected = false;
     }
@@ -478,10 +478,10 @@ class VListView extends PureComponent {
     let filter_text = this.props.currentScreen.screen_container.get_text()
     let selected_records = []
     // let selected_index = []
-    let selected_index = cleanSelection ?[]:[...this.state.selected_index]
-    
+    let selected_index = cleanSelection ? [] : [...this.state.selected_index]
+
     let scrollTo = 0
-    
+
     this.view_refs.infinite_loader.resetLoadMoreRowsCache()
 
 
@@ -490,7 +490,7 @@ class VListView extends PureComponent {
 
       if (focusRecord) {
         selected_index = []
-        
+
         scrollTo = this.props.group.indexOf(this.props.currentScreen.current_record)
 
         selected_index.push(scrollTo)
@@ -527,8 +527,8 @@ class VListView extends PureComponent {
 
     }
 
-    
-    
+
+
     this.setState({
       loadedRows: [],
       field_states: {},
@@ -539,14 +539,14 @@ class VListView extends PureComponent {
     }, () => {
       this.loadMoreRows({ startIndex: 0, stopIndex: minimumBatchSize }).then((response) => {
 
-        if(this.state.selected_index.length > 0){
+        if (this.state.selected_index.length > 0) {
 
-          
+
           let records_selection = []
-          this.state.selected_index.forEach(function(group_index){
+          this.state.selected_index.forEach(function (group_index) {
             records_selection.push(this.props.group[group_index])
           }.bind(this))
-          
+
           this.props.currentScreen.current_view.set_selected_records(records_selection)
 
           //Update current record on SAO when selection is recovered
@@ -554,11 +554,11 @@ class VListView extends PureComponent {
           this.setState({
             currentRecord: records_selection[0]
           })
-          
+
 
 
         }
-        else{
+        else {
           if (this.props.currentScreen.current_view.view_context) {
             this.props.currentScreen.current_record = null
             this.props.currentScreen.current_view.set_selected_records([])
@@ -566,7 +566,7 @@ class VListView extends PureComponent {
               currentRecord: {}
             })
           }
-         
+
         }
 
         this.view_refs.infinite_loader._registeredChild.forceUpdate()
@@ -591,8 +591,8 @@ class VListView extends PureComponent {
               //avoid to select the new record, just focus
               selected_index: []
             })
-            
-            
+
+
             this.props.currentScreen.current_view.set_selected_records([])
             this.view_refs.infinite_loader._registeredChild.scrollToCell({ columnIndex: columnIndex, rowIndex: scrollTo - 1 })
             this.focusInputCell(scrollTo, 1)
@@ -885,25 +885,25 @@ class VListView extends PureComponent {
     //5.2 set_current_record is not a function anymore
   }
 
-  updateSelectedRecords(){
-    if(this.state.selected_index.length === 0){
+  updateSelectedRecords() {
+    if (this.state.selected_index.length === 0) {
       return;
     }
     let loadedRows = [...this.state.loadedRows]
-    
-    this.state.selected_index.forEach(function(row){
+
+    this.state.selected_index.forEach(function (row) {
       loadedRows.splice(loadedRows.indexOf(row), 1)
     })
-    
+
     let startIndex = this.state.selected_index[0]
-    let stopIndex = this.state.selected_index[this.state.selected_index.length-1]
-    
-    
+    let stopIndex = this.state.selected_index[this.state.selected_index.length - 1]
+
+
     this.setState({
       loadedRows: loadedRows,
-      
+
     }, () => {
-      this.loadMoreRows({ startIndex:startIndex , stopIndex: stopIndex }).then((response) => {
+      this.loadMoreRows({ startIndex: startIndex, stopIndex: stopIndex }).then((response) => {
         this.view_refs.infinite_loader._registeredChild.forceUpdate()
 
       })
@@ -1017,27 +1017,27 @@ class VListView extends PureComponent {
 
       }
       case 'datetime': {
-        if (value) { 
+        if (value) {
           const df = column.field.date_format(this.props.group[rowIndex]);
-          
+
           const tf = column.field.time_format(this.props.group[rowIndex])
-          
+
           const date_time_format = df + ' ' + tf
-          
-          return window.Sao.common.format_datetime(date_time_format,this.props.group[rowIndex]._values[column.field.name])
-          
+
+          return window.Sao.common.format_datetime(date_time_format, this.props.group[rowIndex]._values[column.field.name])
+
         }
       }
       case 'timestamp': {
-        if (value) { 
+        if (value) {
           const df = column.field.date_format(this.props.group[rowIndex]);
-          
+
           const tf = column.field.time_format(this.props.group[rowIndex])
-          
+
           const date_time_format = df + ' ' + tf
-          
-          return window.Sao.common.format_datetime(date_time_format,this.props.group[rowIndex]._values[column.field.name])
-          
+
+          return window.Sao.common.format_datetime(date_time_format, this.props.group[rowIndex]._values[column.field.name])
+
         }
       }
       case 'time': {
@@ -1115,19 +1115,21 @@ class VListView extends PureComponent {
 
 
 
-          if (Array.isArray(column.field.description.selection)) {
+          if (Array.isArray(column.field.description.reference_selection)) {
 
-            column.field.description.selection.map(function (pair) {
+            column.field.description.reference_selection.map(function (pair) {
               if (pair[0] === value[0]) {
                 model_name = pair[1]
               }
             })
           }
+          
 
 
           return model_name + ',' + this.props.group[rowIndex]._values[column.attributes.name.concat('.')].rec_name
         }
         else { return "" }
+        
       }
       case 'text': {
         if (this.props.editable) {
@@ -1216,7 +1218,7 @@ class VListView extends PureComponent {
           <div style={{ marginTop: this.props.list_view_style === 'compact' ? '0.1em' : '' }} className="list-progressbar">
             <div className="list-filled-progressbar" style={{ background: 'linear-gradient(90deg, rgba(36,126,182,0.7) ' + (percentage).toString().concat('%') + ', white 0%)' }}>
               {percentage} %
-          </div>
+            </div>
           </div>)
       }
       case 'image': {
@@ -1384,7 +1386,7 @@ class VListView extends PureComponent {
 
 
   batchEdit(positions) {
-    
+
     positions.forEach(function (position) {
       let field = this.props.columns[position.columnIndex].field
       field.set_client(this.props.group[position.rowIndex], position.value, true)
@@ -1517,7 +1519,7 @@ class VListView extends PureComponent {
     const ordered = { index: columnIndex, order: order }
     this.setState({
       ordered_column: ordered,
-      selected_index:[]
+      selected_index: []
     })
     this.props.setModified({ order: ordered })
     this.props.currentScreen.current_view.set_selected_records([])
@@ -1643,36 +1645,36 @@ class VListView extends PureComponent {
   }
 
   copyToColumn(direction, rowIndex, columnIndex, action) {
-   
+
     const to_edit = []
     let pending = false;
 
-    
-    const value = this.props.group[rowIndex]._values[this.props.columns[columnIndex].attributes.name]
-    
 
-    const hasValue = function (row, column){
+    const value = this.props.group[rowIndex]._values[this.props.columns[columnIndex].attributes.name]
+
+
+    const hasValue = function (row, column) {
       const cell_value = this.props.group[row]._values[this.props.columns[column].attributes.name]
       return cell_value !== null && cell_value !== ""
     }.bind(this);
 
     const addCell = function (row) {
-      if(!action){
-        
-        if(hasValue(row, columnIndex)){
+      if (!action) {
+
+        if (hasValue(row, columnIndex)) {
           this.setState({
-            copyConfirmationModal:true,
-            pendingCopy:{direction:direction,rowIndex:rowIndex, columnIndex:columnIndex,value:value}
+            copyConfirmationModal: true,
+            pendingCopy: { direction: direction, rowIndex: rowIndex, columnIndex: columnIndex, value: value }
           })
           return false;
         }
       }
-      
+
       const cell_state = this.getCellState(row, columnIndex)
 
 
       if (!cell_state.readonly && !cell_state.invisible) {
-        if(action === 'empty_cells' && hasValue(row, columnIndex)){
+        if (action === 'empty_cells' && hasValue(row, columnIndex)) {
           return true;
         }
         to_edit.push({
@@ -1690,7 +1692,7 @@ class VListView extends PureComponent {
       this.props.group.forEach(function (value, index) {
         if (index < rowIndex) {
           // addCell(index)
-          if(!addCell(index)){
+          if (!addCell(index)) {
             pending = true;
             return
           }
@@ -1701,7 +1703,7 @@ class VListView extends PureComponent {
     else if (direction === 'down') {
       this.props.group.forEach(function (value, index) {
         if (index > rowIndex) {
-          if(!addCell(index)){
+          if (!addCell(index)) {
             pending = true;
             return
           }
@@ -1711,15 +1713,15 @@ class VListView extends PureComponent {
       })
     }
 
-    
-    
-    if(!pending){
+
+
+    if (!pending) {
       this.batchEdit(to_edit)
       this.setState({
-        pendingCopy:false
+        pendingCopy: false
       })
     }
-    
+
 
     //[{rowIndex, columnIndex, value}]
 
@@ -1808,18 +1810,18 @@ class VListView extends PureComponent {
   changeSelection(e, rowIndex, force_single) {
     var record = this.props.group[rowIndex]
     const setSelection = (selected_index, selected_records) => {
-      
-      const cr = !selected_records.length ? null:record
-      
+
+      const cr = !selected_records.length ? null : record
+
       this.props.currentScreen.current_record = cr
-      
-      
+
+
       this.setState({
         selected_index: selected_index,
-        currentRecord: cr ? cr:{}
+        currentRecord: cr ? cr : {}
       })
 
-      
+
       this.props.currentScreen.current_view.set_selected_records(selected_records)
       this.view_refs.infinite_loader._registeredChild.forceUpdate()
     }
@@ -2620,7 +2622,7 @@ class VListView extends PureComponent {
 
   //must return a promise
   loadMoreRows({ startIndex, stopIndex }) {
-    
+
     if (this.props.group.length === 0) {
       let prm = {
         then: function () {
@@ -2662,7 +2664,7 @@ class VListView extends PureComponent {
 
     return this.props.group[startIndex].loadRange('*', increment, true, fields, this.props.prefixes, this.props.extra_fields).done(function () {
 
-      
+
 
     }.bind(this))
   }
@@ -3104,7 +3106,7 @@ class VListView extends PureComponent {
                                   height={height}
                                   onScroll={onScroll}
                                   onSectionRendered={({ columnStartIndex, columnStopIndex, rowStartIndex, rowStopIndex }) => {
-                                    
+
                                     onRowsRendered({
                                       startIndex: rowStartIndex,
                                       stopIndex: rowStopIndex,
@@ -3193,21 +3195,21 @@ class VListView extends PureComponent {
         >
           <div className="modal-title" style={{ paddingLeft: '0px' }}> {Sao.i18n.gettext('Warning')}</div>
           <div style={{ marginTop: '1rem' }}>
-          <p>{window.Sao.i18n.gettext('There are cells with values in the column')}</p>
+            <p>{window.Sao.i18n.gettext('There are cells with values in the column')}</p>
           </div>
-         
-          <div className="pt-6" style={{ display: 'flex', marginBottom:'1rem' }}>
+
+          <div className="pt-6" style={{ display: 'flex', marginBottom: '1rem' }}>
             <Button
-              style={{ lineHeight: 1.5, backgroundColor: "#e7e7e7", color: "rgb(40,80,146)", marginRight:'5px' }}
+              style={{ lineHeight: 1.5, backgroundColor: "#e7e7e7", color: "rgb(40,80,146)", marginRight: '5px' }}
               onClick={() => { this.setState({ copyConfirmationModal: false }) }}
               states={{}}
               label={window.Sao.i18n.gettext('Cancel')}
             />
             <Button
-              style={{ lineHeight: 1.5, backgroundColor: '#e7e7e7', color:'red', marginRight:'5px' }}
-              onClick={function (e) { 
+              style={{ lineHeight: 1.5, backgroundColor: '#e7e7e7', color: 'red', marginRight: '5px' }}
+              onClick={function (e) {
                 const copyInfo = this.state.pendingCopy;
-                this.copyToColumn(copyInfo.direction, copyInfo.rowIndex,copyInfo.columnIndex, 'replace_all') 
+                this.copyToColumn(copyInfo.direction, copyInfo.rowIndex, copyInfo.columnIndex, 'replace_all')
                 this.setState({ copyConfirmationModal: false })
               }.bind(this)}
               states={{}}
@@ -3215,9 +3217,9 @@ class VListView extends PureComponent {
             />
             <Button
               style={{ lineHeight: 1.5 }}
-              onClick={function (e) { 
+              onClick={function (e) {
                 const copyInfo = this.state.pendingCopy;
-                this.copyToColumn(copyInfo.direction, copyInfo.rowIndex,copyInfo.columnIndex, 'empty_cells') 
+                this.copyToColumn(copyInfo.direction, copyInfo.rowIndex, copyInfo.columnIndex, 'empty_cells')
                 this.setState({ copyConfirmationModal: false })
               }.bind(this)}
               states={{}}

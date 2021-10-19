@@ -123,7 +123,7 @@ class TreeView extends PureComponent {
 
 
     if (window.$) {
-      
+
 
       if (type === 'list_view') {
         let el = document.createElement('span')
@@ -188,7 +188,9 @@ class TreeView extends PureComponent {
   getFilterFields() {
     let filter_fields = {}
     this.state.visibleFields.forEach(function (col) {
+      
       if (col.type === "field") {
+        
         filter_fields[col.attributes.name] = col.field.description
       }
 
@@ -231,16 +233,19 @@ class TreeView extends PureComponent {
 
     if (JSON.stringify(this.props.sao_props.domain) != JSON.stringify(prevProps.sao_props.domain)) {
       // if(this.props.sao_props.domain != prevProps.sao_props.domain){
-        
+
       this.updateColumnsDomain(this.props.sao_props.domain)
 
     }
     if (prevState.visibleFields !== this.state.visibleFields) {
-
+      
       let filter_fields = this.getFilterFields()
       this.props.sao_props.screen.domain_parser.fields = {};
       this.props.sao_props.screen.screen_container.search_modal = false;
       this.props.sao_props.screen.domain_parser.update_fields(filter_fields);
+      this.initializeFields(this.state.fields)
+      
+      
     }
 
 
@@ -264,7 +269,7 @@ class TreeView extends PureComponent {
     }
 
 
-
+    
 
 
 
@@ -325,21 +330,21 @@ class TreeView extends PureComponent {
 
         recovered_column.unique = false;
 
-        
+
         let idx = this.state.fields.indexOf(recovered_column)
-        
+
         // Restore unique column in the right index
-        if(idx){
+        if (idx) {
           // When no user view applied, add 1 to idx to avoid first position bug.
-          if(this.state.current_view.id === 0){
-            idx+=1
+          if (this.state.current_view.id === 0) {
+            idx += 1
           }
-          columns.splice(idx,0,recovered_column)
+          columns.splice(idx, 0, recovered_column)
         }
-        else{
+        else {
           columns.push(recovered_column)
         }
-        
+
         update = true
       }.bind(this))
 
@@ -360,7 +365,7 @@ class TreeView extends PureComponent {
 
   //TODO: Refactor
   getStateAttrFields(col) {
-    
+
     let decoder = new window.Sao.PYSON.Decoder({}, true);
     let states_decoded;
     let skip = false;
@@ -407,20 +412,20 @@ class TreeView extends PureComponent {
       // let fieldMap = []
       let fields = []
       Object.values(states_decoded).forEach(function (st) {
-        
+
         if (st && typeof st != 'boolean' && !Array.isArray(st)) {
-          if(st.__string_params__){
-            
+          if (st.__string_params__) {
+
             let args = st.__string_params__()
             fields = args.map(function (arg) {
-              
-  
+
+
               let value = getValue(arg)
-  
+
               return value;
             })
           }
-          
+
         }
 
 
@@ -530,7 +535,7 @@ class TreeView extends PureComponent {
       }
 
 
-      
+
       return col.attributes.tree_invisible !== 1
     }.bind(this)).filter(function (col) { return col.attributes.name !== this.props.sao_props.screen.exclude_field }.bind(this))
 
@@ -601,6 +606,40 @@ class TreeView extends PureComponent {
 
   }
 
+  async initializeFields(columns) {
+    
+    let initializeReferenceField = (column) => {
+      if(column && column.field){
+        
+        let callback = (selection) => {
+          
+          column.field.description.reference_selection = selection;
+          column.field.description.selection = selection;
+          column.field.selection = selection;
+          const filter_fields = {}
+          filter_fields[column.field.name] = column.field.description
+          this.props.sao_props.screen.domain_parser.update_fields(filter_fields);
+          if(Array.isArray(selection) && selection.length){
+            column.initialized = true;
+          }
+        }
+        Sao.common.selection_mixin.init.call(column)
+        Sao.common.selection_mixin.init_selection.call(column, false,callback)
+      }
+      
+      // Sao.common.selection_mixin.update_selection.call(column, this.props.group[rowIndex], column.field, callback)
+    }
+    
+    columns.forEach(function (column) {
+      if (column.field && column.field.description.type === 'reference') {
+        if(!column.initialized){
+          initializeReferenceField(column)
+        }
+        
+      }
+    })
+
+  }
 
 
 
@@ -751,8 +790,8 @@ class TreeView extends PureComponent {
 
     }
 
-    if(current_view.records_qty){
-      
+    if (current_view.records_qty) {
+
       this.props.sao_props.screen.limit = current_view.records_qty
     }
     if (type === "list_view") {
@@ -835,6 +874,13 @@ class TreeView extends PureComponent {
         else {
           f = field
           f.field = this.props.sao_props.screen.model.fields[field.name]
+
+          //Add some extra attributes for reference fields
+          if(f.field.description.selection){
+            f.attributes.selection = f.field.description.selection
+            f.field.selection = f.field.description.selection
+            f.model = this.props.sao_props.screen.model
+          }
         }
 
       }
@@ -860,7 +906,7 @@ class TreeView extends PureComponent {
     if (new_view.value != this.state.current_view.id) {
       let cv = { 'id': new_view.value, 'rec_name': new_view.label }
 
-      
+
 
       if (new_view.value === 0) {
         this.setColumns(false, false)
@@ -873,7 +919,7 @@ class TreeView extends PureComponent {
         cv = this.state.user_views.filter(function (view) { return view.id === new_view.value })[0]
 
         //update records qty on view change
-        let records_qty = cv.records_qty ? cv.records_qty:200
+        let records_qty = cv.records_qty ? cv.records_qty : 200
         this.props.sao_props.screen.limit = records_qty
 
         let cols = await this.getUserViewFields(new_view.value)
@@ -1080,10 +1126,10 @@ class TreeView extends PureComponent {
     view.fields = new_fields
 
     //Add filters to view
-    view.search = view.filters ? this.props.sao_props.screen.screen_container.get_text():""
+    view.search = view.filters ? this.props.sao_props.screen.screen_container.get_text() : ""
 
     //Add records QTY to view
-    view.records_qty = view.add_records_qty ? parseInt(this.props.sao_props.screen.limit):200
+    view.records_qty = view.add_records_qty ? parseInt(this.props.sao_props.screen.limit) : 200
 
     view.user = this.props.sao_props.session.user_id
 
@@ -1110,8 +1156,8 @@ class TreeView extends PureComponent {
     })
   }
 
-  changeViewLimit(value){
-    
+  changeViewLimit(value) {
+
     this.props.sao_props.screen.limit = value
     this.props.sao_props.screen.screen_container.do_search();
   }
@@ -1159,8 +1205,8 @@ class TreeView extends PureComponent {
               switchViewMode={this.switchViewMode}
               access={this.props.sao_props.session.context.view_manager_access}
               // screen={this.props.sao_props.screen}
-              records_qty ={this.props.sao_props.screen.limit}
-              changeViewLimit = {this.changeViewLimit}
+              records_qty={this.props.sao_props.screen.limit}
+              changeViewLimit={this.changeViewLimit}
             />
           </Portal>
           :
