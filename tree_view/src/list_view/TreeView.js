@@ -623,8 +623,8 @@ class TreeView extends PureComponent {
             column.initialized = true;
           }
         }
-        Sao.common.selection_mixin.init.call(column)
-        Sao.common.selection_mixin.init_selection.call(column, false,callback)
+        window.Sao.common.selection_mixin.init.call(column)
+        window.Sao.common.selection_mixin.init_selection.call(column, false,callback)
       }
       
       // Sao.common.selection_mixin.update_selection.call(column, this.props.group[rowIndex], column.field, callback)
