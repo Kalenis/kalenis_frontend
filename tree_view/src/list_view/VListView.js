@@ -303,7 +303,7 @@ class VListView extends PureComponent {
     }
 
     if (this.props.currentScreen.current_record) {
-      if (this.props.currentScreen.current_record.id !== this.state.currentRecord.id
+      if (this.state.currentRecord && this.props.currentScreen.current_record.id !== this.state.currentRecord.id
         && Object.keys(this.state.currentRecord).length) {
         this.setState({
           currentRecord: this.props.currentScreen.current_record
@@ -528,25 +528,29 @@ class VListView extends PureComponent {
     }
 
 
-
+    
     this.setState({
       loadedRows: [],
       field_states: {},
       selected_index: selected_index,
+      toogleAll:false,
       currentFilter: filter_text,
       editedRow: -1,
       editedColumn: -1
     }, () => {
       this.loadMoreRows({ startIndex: 0, stopIndex: minimumBatchSize }).then((response) => {
-
+        this.view_refs.left_header_cell.forceUpdate()
         if (this.state.selected_index.length > 0) {
 
 
           let records_selection = []
           this.state.selected_index.forEach(function (group_index) {
-            records_selection.push(this.props.group[group_index])
+            if(this.props.group[group_index]){
+              records_selection.push(this.props.group[group_index])
+            }
+            
           }.bind(this))
-
+          
           this.props.currentScreen.current_view.set_selected_records(records_selection)
 
           //Update current record on SAO when selection is recovered
@@ -854,7 +858,7 @@ class VListView extends PureComponent {
 
       <div className={"leftCell"} key={key} style={style}>
 
-        <input type="checkbox" style={{ cursor: 'pointer' }} onChange={function (e) { this.toogleAll(e) }.bind(this)} key={key} value={columnIndex} />
+        <input type="checkbox" checked={this.state.toogleAll} style={{ cursor: 'pointer' }} onChange={function (e) { this.toogleAll(e) }.bind(this)} key={key}  />
 
 
       </div>
@@ -1796,11 +1800,12 @@ class VListView extends PureComponent {
 
     this.props.currentScreen.current_view.set_selected_records(selected_records)
     this.props.currentScreen.current_record = selected_records[0]
-
+    
     this.setState({
       toogleAll: !this.state.toogleAll,
       selected_index: selected_index
     })
+    this.view_refs.left_header_cell.forceUpdate()
 
 
   }
@@ -3007,6 +3012,7 @@ class VListView extends PureComponent {
                     height={headerHeight}
                     rowHeight={headerHeight}
                     // columnWidth={this.getColumnWidth}
+                    ref={left_header_cell => { this.view_refs['left_header_cell'] = left_header_cell; }}
                     columnWidth={this.getColumnWidth}
                     rowCount={1}
                     columnCount={1}

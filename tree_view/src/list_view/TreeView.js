@@ -857,8 +857,12 @@ class TreeView extends PureComponent {
       let f;
       if (field.type === 'button') {
         f = findOriginal(field.attributes.name)
-        f.attributes.width = field.attributes.width
-        return f
+        if(f && f.attributes){
+          f.attributes.width = field.attributes.width
+          return f
+        }
+        
+        
       }
 
       if (!added_fields.includes(field.name)) {
