@@ -38,7 +38,7 @@ Sao.common.direct_print = function (data, file_name) {
 //session.js
 
 Sao.Session.prototype.reload_context = function () {
-    console.log("EXECUTING RELOAD CONTEXT");
+    
     var args = {
         'method': 'model.res.user.get_preferences',
         'params': [true, {}]
@@ -482,7 +482,14 @@ Sao.Tab.prototype.create_toolbar = function () {
             button.prop('disabled', true);
             (this[item.id](this) || jQuery.when())
                 .always(function () {
-                    button.prop('disabled', false);
+                    
+                    var enable_button = function(){
+                        button.prop('disabled', false);
+                    };
+                    setTimeout(function() { enable_button(); }, 500);
+
+                    
+
                 });
         }.bind(this));
     };
@@ -715,7 +722,7 @@ Sao.Tab.Form.prototype.create_toolbar = function () {
 
 
 Sao.Tab.Form.prototype._close_allowed = function () {
-
+    
     if (this.screen.context.kalenis_board) {
         return jQuery.when();
     }
