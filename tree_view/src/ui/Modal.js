@@ -7,8 +7,8 @@ import Paper from './surfaces/Paper.js';
 
 function Modal(props) {
     // const width = 150
-
-
+    const base_cls = 'absolute bg-modal-background inset-0'
+    const background_classname = props.background_classname ? props.background_classname:base_cls
     const style = {
         position:'absolute',
         top                   : '50%',
@@ -27,7 +27,7 @@ function Modal(props) {
         <>
             {props.open &&
                 <Portal target={props.target ? props.target:false}>
-                    <div className="absolute bg-modal-background inset-0">
+                    <div className={background_classname}>
                         {props.paper ?
                             <Paper className={props.className} style={style} >
                                 {props.children}

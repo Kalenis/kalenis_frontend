@@ -207,6 +207,7 @@ Sao.View.KalenisTree = Sao.class_(Sao.View, {
                 sao_props: { 
                     domain:domain, 
                     screen: this.screen, 
+                    search_loading:this.screen.screen_container.searching,
                     columns: this.columns, 
                     group: group,  
                     field_name: this.field_name,field_instance:this.field_instance || null, 

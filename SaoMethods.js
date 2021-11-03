@@ -729,6 +729,56 @@ Sao.Tab.Form.prototype._close_allowed = function () {
     return this.modified_save();
 };
 
+Sao.Tab.Form.prototype.record_message = function(data) {
+    if (data) {
+        var name = "_";
+        if (data[0] !== 0) {
+            name = data[0];
+        }
+        var buttons = ['print', 'relate', 'email', 'save', 'attach'];
+        buttons.forEach(function(button_id){
+            var button = this.buttons[button_id];
+            //Kalenis: If no button, return: prevent to crash when checking can_be_sensitive of undefined
+            if(!button){
+                return;
+            }
+            console.log("Close block-------------------");
+            var can_be_sensitive = button._can_be_sensitive;
+            if (can_be_sensitive === undefined) {
+                can_be_sensitive = true;
+            }
+            if ((button_id == 'print') ||
+                (button_id == 'relate') ||
+                (button_id == 'email')) {
+                can_be_sensitive |= this.screen.get_buttons().some(
+                    function(button) {
+                        var keyword = button.attributes.keyword || 'action';
+                        return keyword == button_id;
+                    });
+            } else if (button_id == 'save') {
+                can_be_sensitive &= !this.screen.readonly;
+            }
+            button.prop('disabled', !(data[0] && can_be_sensitive));
+        }.bind(this));
+        this.buttons.switch_.prop('disabled',
+            this.attributes.view_ids > 1);
+
+        this.menu_buttons.delete_.toggleClass(
+            'disabled', !this.screen.deletable);
+        this.menu_buttons.save.toggleClass(
+            'disabled', this.screen.readonly);
+
+        var msg = name + ' / ' + data[1];
+        if ((data[1] < data[2]) && (data[2] > this.screen.limit)) {
+            msg += Sao.i18n.gettext(' of ') + data[2];
+        }
+        this.status_label.text(msg).attr('title', msg);
+    }
+    this.info_bar.message();
+    // TODO activate_save
+    this.refresh_attachment_preview();
+};
+
 
 //Add react components unmount
 Sao.Tab.prototype.close = function () {
@@ -2404,6 +2454,8 @@ Sao.ScreenContainer.prototype.init = function (tab_domain) {
     //kalenis: Active tab is used from TabDomain component (get/set)
     this.active_tab = null;
     this.tabs_counters = {};
+    //kalenis: toogled when a search is dispatched
+    this.searching = false;
     //
     this.tab_counter = [];
     this.el = jQuery('<div/>', {
@@ -2457,7 +2509,8 @@ Sao.ScreenContainer.prototype.init = function (tab_domain) {
         this.bookmark_match();
     }.bind(this));
 
-    var but_submit = jQuery('<button/>', {
+    //0211
+    this.but_submit = jQuery('<button/>', {
         'type': 'submit',
         'class': 'btn btn-default',
         'aria-label': Sao.i18n.gettext("Search"),
@@ -2528,7 +2581,7 @@ Sao.ScreenContainer.prototype.init = function (tab_domain) {
         .append(jQuery('<span/>', {
             'class': 'input-group-btn'
         }).append(but_clear)
-            .append(but_submit)
+            .append(this.but_submit)
             .append(this.but_star)
             .append(this.but_bookmark)
             .append(dropdown_bookmark)
@@ -2766,6 +2819,26 @@ Sao.Screen.prototype.remove = function (delete_, remove, force_remove, records) 
                 this.set_cursor();
             }.bind(this));
         }.bind(this));
+    }.bind(this));
+};
+
+Sao.ScreenContainer.prototype.set_searching = function (value) {
+    this.searching = value;
+    this.but_submit.prop('disabled',value);
+    this.search_entry.attr('readonly',value);
+    this.screen.current_view.display();
+};
+
+//HERE =>=> Loading indicator => after the promise is solved, you need to update the props on react, but currently this means to make a full display of the view...
+// Plan b => Code the loader using jquery.
+Sao.ScreenContainer.prototype.do_search= function() {
+    // this.but_submit.prop('disabled', true);
+    console.log("INHERITED DO SEARCH");
+    this.set_searching(true);
+    return this.screen.search_filter(this.get_text()).then(function(value){
+        console.log("Should Enable button");
+        this.set_searching(false);
+        
     }.bind(this));
 };
 

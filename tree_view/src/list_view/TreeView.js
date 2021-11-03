@@ -7,6 +7,7 @@ import TabDomain from './TabDomain.js';
 import ws from '../common/ws.js';
 import Portal from '../common/Portal.js'
 import ViewManager from './ViewManager';
+import Modal from '../ui/Modal'
 import { ColumnSizer } from 'react-virtualized';
 
 // const currentSession = window.Sao.Session.current_session
@@ -795,14 +796,28 @@ class TreeView extends PureComponent {
       this.props.sao_props.screen.limit = current_view.records_qty
     }
     if (type === "list_view") {
+
+      const search = (searcher)=>{
+        console.log("Disabling in initial search");
+        
+        this.props.sao_props.screen.screen_container.set_searching(true);
+        return searcher.then(function(value){
+          this.props.sao_props.screen.screen_container.set_searching(false);
+          
+          
+        }.bind(this))
+      }
+      
       if (current_view.search) {
 
         this.props.sao_props.screen.screen_container.set_text(current_view.search)
-        this.props.sao_props.screen.search_filter(current_view.search);
+        search(this.props.sao_props.screen.search_filter(current_view.search))
+        
       }
-      // this.props.sao_props.screen.screen_container.do_search()
+      
       else {
-        this.props.sao_props.screen.search_filter();
+        search(this.props.sao_props.screen.search_filter());
+       
       }
 
 
@@ -1166,7 +1181,7 @@ class TreeView extends PureComponent {
     this.props.sao_props.screen.screen_container.do_search();
   }
 
-
+ 
 
 
   render() {
@@ -1174,6 +1189,16 @@ class TreeView extends PureComponent {
     return (
 
       <div className="App">
+        <Modal
+          open={this.props.sao_props.search_loading}
+          background_classname="absolute inset-0"
+          target={this.props.element_id}
+        >
+           <svg style={{height:'4rem', width:'4rem', marginLeft:'0.25rem', marginRight:'0.75rem'}} className="ml-1 mr-3 text-primary animation_spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle style={{opacity:'0.25'}}  cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path style={{opacity:'0.75'}} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        </Modal>
         {this.state.tab_domain ?
           <TabDomain
             tabs={this.props.sao_props.screen.screen_container.tab_domain}
