@@ -672,3 +672,6 @@ msgstr "Sólo Celdas Vacías"
 msgid "Records Quantity"
 msgstr "Cantidad de Registros"
 
+msgid "Preview"
+msgstr "Previsualizar"
+
