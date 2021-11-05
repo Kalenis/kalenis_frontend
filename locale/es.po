@@ -675,3 +675,38 @@ msgstr "Cantidad de Registros"
 msgid "Preview"
 msgstr "Previsualizar"
 
+msgid "To:"
+msgstr "Para:"
+
+msgid "Cc:"
+msgstr "Cc:"
+
+msgid "Bcc:"
+msgstr "Cco:"
+
+msgid "Subject:"
+msgstr "Asunto:"
+
+msgid "Reports"
+msgstr "Reportes"
+
+msgid "Attachments"
+msgstr "Adjuntos"
+
+msgid "Files"
+msgstr "Archivos"
+
+msgid "Send"
+msgstr "Enviar"
+
+msgid "Remove File"
+msgstr "Eliminar Archivo"
+
+msgid "Remove"
+msgstr "Eliminar"
+
+
+
+
+
+
