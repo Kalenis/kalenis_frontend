@@ -482,11 +482,16 @@ Sao.Tab.prototype.create_toolbar = function () {
             button.prop('disabled', true);
             (this[item.id](this) || jQuery.when())
                 .always(function () {
-                    
+                    if(['attach','email'].includes(button.attr('id'))){
+                        button.prop('disabled', false);
+                    }
+                    else{
                     var enable_button = function(){
                         button.prop('disabled', false);
                     };
                     setTimeout(function() { enable_button(); }, 500);
+                    }
+                    
 
                     
 
@@ -517,8 +522,8 @@ Sao.Tab.Form.prototype.create_toolbar = function () {
     var toolbar = Sao.Tab.Form._super.create_toolbar.call(this);
     var screen = this.screen;
     var buttons = this.buttons;
-    var prm = screen.model.execute('view_toolbar_get', [],
-        screen.context);
+    var prm = screen.model.execute(
+        'view_toolbar_get', [],screen.context);
     prm.done(function (toolbars) {
         [
             ['action', 'tryton-launch',
@@ -742,7 +747,6 @@ Sao.Tab.Form.prototype.record_message = function(data) {
             if(!button){
                 return;
             }
-            console.log("Close block-------------------");
             var can_be_sensitive = button._can_be_sensitive;
             if (can_be_sensitive === undefined) {
                 can_be_sensitive = true;
@@ -2833,10 +2837,10 @@ Sao.ScreenContainer.prototype.set_searching = function (value) {
 // Plan b => Code the loader using jquery.
 Sao.ScreenContainer.prototype.do_search= function() {
     // this.but_submit.prop('disabled', true);
-    console.log("INHERITED DO SEARCH");
+    
     this.set_searching(true);
     return this.screen.search_filter(this.get_text()).then(function(value){
-        console.log("Should Enable button");
+        
         this.set_searching(false);
         
     }.bind(this));
