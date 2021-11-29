@@ -1656,13 +1656,23 @@ class VListView extends PureComponent {
 
     const value = this.props.group[rowIndex]._values[this.props.columns[columnIndex].attributes.name]
 
-
+    const isLoaded = function(row, column){
+      const record = this.props.group[row]
+      if(!Object.keys(record._loaded).length){
+        return false
+      }
+      return true
+    }.bind(this)
     const hasValue = function (row, column) {
       const cell_value = this.props.group[row]._values[this.props.columns[column].attributes.name]
       return cell_value !== null && cell_value !== ""
     }.bind(this);
 
     const addCell = function (row) {
+      // if(!isLoaded(row)){
+      //   alert("Existen filas no visualizadas. Por favor visualice todos los registros antes de realizar la copia.")
+      //   return false
+      // }
       if (!action) {
 
         if (hasValue(row, columnIndex)) {
@@ -1817,8 +1827,10 @@ class VListView extends PureComponent {
     const setSelection = (selected_index, selected_records) => {
 
       const cr = !selected_records.length ? null : record
-
-      this.props.currentScreen.current_record = cr
+      if(cr !== false){
+        this.props.currentScreen.current_record = cr
+      }
+      
 
 
       this.setState({
@@ -1935,19 +1947,25 @@ class VListView extends PureComponent {
             if (this.props.currentScreen.current_record) {
               if (this.props.currentScreen.current_record === record) {
                 this.props.currentScreen.current_record = null
+                console.log("Setting current record to null")
                 record = null
               }
 
               else if (selected_records.length === 0) {
-
+                console.log("Setting current record to null")
                 this.props.currentScreen.current_record = null
                 record = null
               }
             }
+            record = false
           }
         }
 
         setSelection(selected_index, selected_records)
+        console.log("Selected INdex")
+        console.log(selected_index)
+        console.log("Selected Records")
+        console.log(selected_records)
         
 
         return true;
