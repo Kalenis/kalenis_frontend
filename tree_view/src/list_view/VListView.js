@@ -1669,10 +1669,10 @@ class VListView extends PureComponent {
     }.bind(this);
 
     const addCell = function (row) {
-      // if(!isLoaded(row)){
-      //   alert("Existen filas no visualizadas. Por favor visualice todos los registros antes de realizar la copia.")
-      //   return false
-      // }
+      if(!isLoaded(row)){
+        alert("Existen filas no visualizadas. Por favor visualice todos los registros antes de realizar la copia.")
+        return false
+      }
       if (!action) {
 
         if (hasValue(row, columnIndex)) {
@@ -1706,10 +1706,13 @@ class VListView extends PureComponent {
       this.props.group.forEach(function (value, index) {
         if (index < rowIndex) {
           // addCell(index)
-          if (!addCell(index)) {
-            pending = true;
-            return
+          if(!pending){
+            if (!addCell(index)) {
+              pending = true;
+              return
+            }
           }
+          
         }
 
       })
@@ -1717,10 +1720,13 @@ class VListView extends PureComponent {
     else if (direction === 'down') {
       this.props.group.forEach(function (value, index) {
         if (index > rowIndex) {
-          if (!addCell(index)) {
-            pending = true;
-            return
+          if(!pending){
+            if (!addCell(index)) {
+              pending = true;
+              return
+            }
           }
+          
 
         }
 
@@ -1947,12 +1953,10 @@ class VListView extends PureComponent {
             if (this.props.currentScreen.current_record) {
               if (this.props.currentScreen.current_record === record) {
                 this.props.currentScreen.current_record = null
-                console.log("Setting current record to null")
                 record = null
               }
 
               else if (selected_records.length === 0) {
-                console.log("Setting current record to null")
                 this.props.currentScreen.current_record = null
                 record = null
               }
@@ -1962,10 +1966,7 @@ class VListView extends PureComponent {
         }
 
         setSelection(selected_index, selected_records)
-        console.log("Selected INdex")
-        console.log(selected_index)
-        console.log("Selected Records")
-        console.log(selected_records)
+        
         
 
         return true;
