@@ -1934,19 +1934,21 @@ class VListView extends PureComponent {
             ];
             if (this.props.currentScreen.current_record) {
               if (this.props.currentScreen.current_record === record) {
-
                 this.props.currentScreen.current_record = null
+                record = null
               }
 
               else if (selected_records.length === 0) {
 
                 this.props.currentScreen.current_record = null
+                record = null
               }
             }
           }
         }
 
         setSelection(selected_index, selected_records)
+        
 
         return true;
       }
