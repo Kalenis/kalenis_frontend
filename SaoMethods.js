@@ -286,7 +286,7 @@ Sao.common.InputCompletion.prototype._set_selection = function (values) {
 //tab.js
 
 Sao.Tab.prototype.set_name= function(name) {
-    var short_name = Sao.common.ellipsize(name.split(' / ').pop(), 20);
+    var short_name = Sao.common.ellipsize(name.split(' / ').pop(), 50);
     this.name = short_name;
     this.name_el.text(short_name);
     this.name_el.attr('title', name);
@@ -3347,6 +3347,7 @@ Sao.Wizard.Dialog.prototype._get_button = function(definition) {
     if (definition['default']) {
         this.content.unbind('submit');
         this.content.submit(function(e) {
+            e.preventDefault();
             //Kalenis: Disable submit button while processing
             button.el.prop('disabled', true);
             var res = this.response(definition);
@@ -3354,7 +3355,7 @@ Sao.Wizard.Dialog.prototype._get_button = function(definition) {
                 button.el.prop('disabled', false);
             }
             
-            e.preventDefault();
+            
         }.bind(this));
         button.el.attr('type', 'submit');
     } else {
