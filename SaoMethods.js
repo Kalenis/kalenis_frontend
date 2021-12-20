@@ -855,6 +855,48 @@ Sao.user_menu = function (preferences) {
         }).text(title)));
 };
 
+Sao.Dialog.prototype.init = function(title, class_, size, keyboard) {
+    size = size || 'sm';
+    if (keyboard === undefined) {
+        keyboard = true;
+    }
+    this.modal = jQuery('<div/>', {
+        'class': class_ + ' modal fade',
+        'role': 'dialog',
+        'data-backdrop': 'static',
+        'data-keyboard': keyboard,
+    });
+    //Kalenis: Add "novalidate" to form. Prevents bugs on datetime validation.
+    this.content = jQuery('<form/>', {
+        'class': 'modal-content',
+        'novalidate':'novalidate',
+    }).appendTo(jQuery('<div/>', {
+        'class': 'modal-dialog modal-' + size
+    }).appendTo(this.modal));
+    this.header = jQuery('<div/>', {
+        'class': 'modal-header'
+    }).appendTo(this.content);
+    if (title) {
+        this.add_title(title);
+    }
+    this.body = jQuery('<div/>', {
+        'class': 'modal-body'
+    }).appendTo(this.content);
+    this.footer = jQuery('<div/>', {
+        'class': 'modal-footer'
+    }).appendTo(this.content);
+
+    this.modal.on('shown.bs.modal', function() {
+        var currently_focused = jQuery(document.activeElement);
+        var has_focus = currently_focused.closest(this.el) > 0;
+        if (!has_focus) {
+            jQuery(this).find(':input:visible' +
+                ':not([readonly]):not([tabindex^="-"]):first')
+                .focus();
+        }
+    });
+};
+
 
 
 //window.js
@@ -3609,6 +3651,8 @@ Sao.Window.InfoBar.prototype.message = function(message, type) {
         this.el.hide();
     }
 };
+
+
 
 
 
