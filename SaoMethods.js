@@ -5,6 +5,17 @@
 //     'toolbar_icons':'white'
 // };
 
+
+Sentry.init({
+    dsn: "https://27064ae5153145de933be847ca775715@o1043307.ingest.sentry.io/6116624",
+    release:"rolling_release",
+    tracesSampleRate: 0.0,
+    });
+    
+
+
+
+
 Sao.config.icon_colors = {
     'toolbar_icons': 'white',
     'default': '#3465a4',
@@ -15,6 +26,7 @@ Sao.config.display_size= 40;
 
 //add Kalenis Addons
 Sao.KalenisAddons = {};
+
 
 //TODO
 //Temporary direct print method
@@ -38,7 +50,8 @@ Sao.common.direct_print = function (data, file_name) {
 //session.js
 
 Sao.Session.prototype.reload_context = function () {
-    
+    var username = this.login + '-' + this.database;
+    Sentry.setUser({ username:username });
     var args = {
         'method': 'model.res.user.get_preferences',
         'params': [true, {}]
@@ -290,6 +303,7 @@ Sao.Tab.prototype.set_name= function(name) {
     this.name = short_name;
     this.name_el.text(short_name);
     this.name_el.attr('title', name);
+    
 };
 
 Sao.Tab.Form.prototype.init = function (model_name, attributes) {

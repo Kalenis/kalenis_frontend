@@ -7,8 +7,6 @@ import './css/fields.css'
 import TreeView from './list_view/TreeView.js';
 import HtmlField from './common/fields/HtmlField.js'
 
-
-
 var Components = {
   delete: element => ReactDOM.unmountComponentAtNode(element),
   createTreeView: element => ReactDOM.render(<TreeView sao_props={element.sao_props} element_id={element.element.id} />, element.element),

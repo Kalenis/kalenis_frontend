@@ -26,6 +26,9 @@ cp ../../locale/es.po .
 cd ..
 
 npm install grunt-po2json
+#here => npm install @sentry/browser @sentry/tracing
+npm install @sentry/browser
+npm install @sentry/tracing
 npm install --production
 
 #Create backup image folder
@@ -53,6 +56,8 @@ cd ..
 cd tree_view
 npm install
 npm run build
+#HERE => update sentry release
+node sentry_release.js
 
 
 # rm -r kalenis_addons/tree_view/node_modules

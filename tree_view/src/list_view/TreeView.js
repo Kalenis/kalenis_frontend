@@ -12,6 +12,8 @@ import { ColumnSizer } from 'react-virtualized';
 
 // const currentSession = window.Sao.Session.current_session
 
+
+
 const columnManagerColors = {
   regular: "rgb(37,106,167)",
   warning: 'red'
