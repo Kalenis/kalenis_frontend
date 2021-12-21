@@ -13,6 +13,7 @@ fi
 mkdir $dist_folder
 echo "Copying files to frontend_dist"
 cp -r sao/bower_components $dist_folder
+cp -r sao/node_modules $dist_folder
 cp -r sao/dist $dist_folder
 mkdir $dist_folder/kalenis_views
 mkdir $dist_folder/kalenis_views/tree_view
