@@ -1466,6 +1466,44 @@ Sao.View.Form.prototype.init = function (view_id, screen, xml) {
     Sao.View.Form._super.init.call(this, view_id, screen, xml);
 };
 
+Sao.View.Form.TranslateDialog.prototype.init = function(languages, widget) {
+    var dialog = new Sao.Dialog(
+        Sao.i18n.gettext('Translate'), this.class_, 'lg');
+    this.languages = languages;
+    this.read(widget, dialog);
+    jQuery('<button/>', {
+        'class': 'btn btn-link',
+        'type': 'button'
+    }).text(Sao.i18n.gettext('Cancel')).click(function() {
+        this.close(dialog);
+    }.bind(this)).appendTo(dialog.footer);
+    jQuery('<button/>', {
+        'class': 'btn btn-primary',
+        'type': 'button'
+    }).text(Sao.i18n.gettext('OK')).click(this.write
+            .bind(this, widget, dialog))
+            .appendTo(dialog.footer);
+    dialog.content.submit(function(evt) {
+        evt.preventDefault();
+        dialog.footer.find('button.btn-primary').first().click();
+    });
+    dialog.modal.modal('show');
+    dialog.modal.on('shown.bs.modal', function() {
+        dialog.modal.find('input,select')
+            .filter(':visible').first().focus();
+    });
+
+    //Bind escape key to close function
+    dialog.modal.on('keydown', function(e) {
+        if (e.which == Sao.common.ESC_KEYCODE) {
+            e.preventDefault();
+            this.close(dialog);
+        }
+    }.bind(this));
+
+    //END ADDED
+};
+
 Sao.View.Form.TranslateDialog.prototype.read = function (widget, dialog) {
     function field_value(result) {
         return result[0][widget.field_name] || '';
