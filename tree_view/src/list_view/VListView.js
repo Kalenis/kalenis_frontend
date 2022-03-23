@@ -302,8 +302,10 @@ class VListView extends PureComponent {
     }
 
     if (this.props.currentScreen.current_record) {
-      if (this.props.currentScreen.current_record.id !== this.state.currentRecord.id
-        && Object.keys(this.state.currentRecord).length) {
+      let current_record = this.state.currentRecord ? this.state.currentRecord:{}
+      let current_record_id = this.state.currentRecord ? this.state.currentRecord.id:false
+      if (this.props.currentScreen.current_record.id !== current_record_id
+        && Object.keys(current_record).length) {
         this.setState({
           currentRecord: this.props.currentScreen.current_record
         })
