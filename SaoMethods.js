@@ -1131,7 +1131,8 @@ Sao.View.Form.One2Many.prototype.init = function (view, attributes) {
         field_type: 'o2m',
         field_name: this.el.attr('id'),
         field_instance: this,
-        context:view.screen.context.dynamic_fields ? ctx:{}
+        // context:view.screen.context.dynamic_fields ? ctx:{}
+        context:ctx,
 
     });
     this.screen.pre_validate = attributes.pre_validate == 1;
