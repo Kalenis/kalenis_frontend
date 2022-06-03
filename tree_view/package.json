@@ -11,17 +11,19 @@
     "clipboard-copy": "^3.1.0",
     "lodash": "^4.17.15",
     "moment": "^2.24.0",
-    "react": "^16.12.0",
+    "react":"link:../../kalenis/portal/frontend_workspace/node_modules/react",
+    "react-dom":"link:../../kalenis/portal/frontend_workspace/node_modules/react-dom",
     "react-calendar": "^3.0.1",
     "react-contexify": "^4.1.1",
-    "react-dom": "^16.12.0",
     "react-draggable": "^4.2.0",
     "react-responsive-modal": "^4.0.1",
     "react-scripts": "3.0.0",
     "react-select": "^3.1.0",
     "react-sortable-hoc": "^1.11.0",
     "react-virtualized": "^9.22.2",
-    "rewire": "^4.0.1"
+    "rewire": "^4.0.1",
+    "kalenis-portal-frontend-main": "link:../../kalenis/portal/portal_main_frontend/",
+    "kalenis-portal-frontend-web": "link:../../kalenis/portal/kalenis-web-components/"
   },
   "scripts": {
     "start": "react-scripts start",

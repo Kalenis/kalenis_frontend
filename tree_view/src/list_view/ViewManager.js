@@ -13,6 +13,12 @@ import { faCog } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 const Sao = window.Sao
+//Temp mock
+if(!Object.keys(Sao).length){
+    window.Sao.i18n = {}
+    window.Sao.i18n.gettext = (value) => {return value}
+}
+
 
 const { Option } = components;
 

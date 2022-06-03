@@ -30,18 +30,18 @@ this repository contains the full copyright notices and license terms. -->
         <link rel="stylesheet" href="bower_components/fullcalendar/dist/fullcalendar.min.css">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
 
-
-        <script type="text/javascript" src="dist/tryton-sao.min.js"></script>
-        <script type="module" src="kalenis_views/importAddons.js"></script>
+        <script type="module" src="kalenis_views/importAddons.js" async></script>
+        <!-- <script type="text/javascript" src="dist/tryton-sao.min.js"></script> -->
+        
         <link rel="stylesheet" type="text/css" href="dist/tryton-sao.min.css"
         media="screen"/>
-        <script type="text/javascript">
+        <!-- <script type="text/javascript">
             if (typeof Sao == 'undefined') {
                 document.write(unescape('%3cscript type="text/javascript" src="dist/tryton-sao.js"%3e%3c/script%3e'));
                 document.write(unescape('%3clink rel="stylesheet" type="text/css" href="dist/tryton-sao.css" media="screen"/%3e'));
             }
-        </script>
-        <script type="text/javascript" src="custom.js"></script>
+        </script> -->
+        <!-- <script type="text/javascript" src="custom.js"></script> -->
         <link rel="stylesheet" type="text/css" href="custom.css" media="screen"/>
         </head>
         <body>
@@ -80,7 +80,12 @@ this repository contains the full copyright notices and license terms. -->
                     <div id="tabcontent" class="tab-content"></div>
                 </div>
             </div>
+            
         </div>
+        <div id="main_kp"></div>
+        <div id="portal_root"></div>
+        <div id="portal_preview"></div>
+        <div id="notifications"></div>
         <script type="text/javascript">
             jQuery(function() {
                     jQuery('[data-toggle="offcanvas"]').click(function() {

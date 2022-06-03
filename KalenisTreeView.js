@@ -202,7 +202,7 @@ Sao.View.KalenisTree = Sao.class_(Sao.View, {
             }
             
     
-            Sao.KalenisAddons.Components.createTreeView({ 
+            window.KalenisAddons.Components.createTreeView({ 
                 element: this.el[0],
                 sao_props: { 
                     domain:domain, 

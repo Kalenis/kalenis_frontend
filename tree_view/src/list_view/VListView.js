@@ -3,7 +3,7 @@ import React, { PureComponent } from 'react';
 import { AutoSizer, ScrollSync, Grid, InfiniteLoader, defaultCellRangeRenderer } from "react-virtualized";
 
 import "react-virtualized/styles.css";
-import scrollbarSize from 'dom-helpers/util/scrollbarSize';
+import scrollbarSize from 'dom-helpers/scrollbarSize';
 import styles from '../css/VListStyles.css'
 import moment from 'moment';
 import { contextMenu } from 'react-contexify';

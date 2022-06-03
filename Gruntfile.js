@@ -26,6 +26,7 @@ module.exports = function(grunt) {
       'src/bus.js',
       'src/plugins.js',
       '../SaoMethods.js',
+      '../PortalMethods.js',
       '../KalenisTreeView.js'
   ];
 
