@@ -1654,10 +1654,11 @@ Sao.Record.prototype.loadRange = function (name, view_limit, force_eager, grid_f
 
     }.bind(this));
 
-    // if (!~fnames.indexOf('rec_name')) {
-    //     fnames_to_fetch.push('rec_name');
-    // }
     fnames.push('_timestamp');
+    // Add rec_name to fnames, avoiding re fetch on reference fields.
+    if (!fnames.includes('rec_name')){
+        fnames.push('rec_name');
+    }
 
     if (prefixes && prefixes.length > 0) {
 
