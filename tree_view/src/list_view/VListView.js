@@ -157,6 +157,7 @@ class VListView extends PureComponent {
     this.setFieldStates = this.setFieldStates.bind(this);
     this.hideContextMenu = this.hideContextMenu.bind(this);
     this.setDragedCells = this.setDragedCells.bind(this);
+    this.setDraggedRange = this.setDraggedRange.bind(this);
     this.startDragCopy = this.startDragCopy.bind(this);
     this.finishDragCopy = this.finishDragCopy.bind(this);
     this.getDragCopyValue = this.getDragCopyValue.bind(this);
@@ -164,7 +165,7 @@ class VListView extends PureComponent {
     this.cellRangeRenderer = this.cellRangeRenderer.bind(this);
     this.pasteArray = this.pasteArray.bind(this);
     this.getCellState = this.getCellState.bind(this);
-    this.copyToColumn = this.copyToColumn.bind(this);
+    this.copyTo = this.copyTo.bind(this);
     this.updateSelectedRecords = this.updateSelectedRecords.bind(this);
     // this.setRecoverScroll = this.setRecoverScroll.bind(this);
 
@@ -1383,10 +1384,20 @@ class VListView extends PureComponent {
   }
 
   finishDragCopy({ deltaX, lastX, columnIndex, rowIndex, value }) {
-
-    let dragedCells = [...this.state.dragedCells].map(function (cell) {
-      cell.value = value
-      return cell
+    const original_type = this.props.columns[this.state.dragOrigin.columnIndex].field.description.type
+    // Filter cells by field type
+    // Filter cells by state_attrs (ignore readonly and invisible cells)
+    let dragedCells = [...this.state.dragedCells].filter(function(cell){
+      const target_type = this.props.columns[cell.columnIndex].field.description.type
+      return target_type === original_type
+    }.bind(this))
+    .filter(function(cell){
+      let cell_state = this.getCellState(cell.rowIndex,cell.columnIndex)
+      return !cell_state.readonly && !cell_state.invisible
+    }.bind(this))
+    .map(function(filtered_cell){
+      filtered_cell.value = value;
+      return filtered_cell
     })
 
 
@@ -1629,13 +1640,13 @@ class VListView extends PureComponent {
     copy(lines);
   }
 
-  copyToColumn(direction, rowIndex, columnIndex, action) {
-   
+  copyTo(direction, rowIndex, columnIndex, action) {
     const to_edit = []
     let pending = false;
 
     
     const value = this.props.group[rowIndex]._values[this.props.columns[columnIndex].attributes.name]
+    const value_field_type = this.props.columns[columnIndex].field.description.type
     
 
     const hasValue = function (row, column){
@@ -1643,10 +1654,10 @@ class VListView extends PureComponent {
       return cell_value !== null && cell_value !== ""
     }.bind(this);
 
-    const addCell = function (row) {
+    const addCell = function (row, column) {
       if(!action){
         
-        if(hasValue(row, columnIndex)){
+        if(hasValue(row, column)){
           this.setState({
             copyConfirmationModal:true,
             pendingCopy:{direction:direction,rowIndex:rowIndex, columnIndex:columnIndex,value:value}
@@ -1655,16 +1666,16 @@ class VListView extends PureComponent {
         }
       }
       
-      const cell_state = this.getCellState(row, columnIndex)
+      const cell_state = this.getCellState(row, column)
 
 
       if (!cell_state.readonly && !cell_state.invisible) {
-        if(action === 'empty_cells' && hasValue(row, columnIndex)){
+        if(action === 'empty_cells' && hasValue(row, column)){
           return true;
         }
         to_edit.push({
           rowIndex: row,
-          columnIndex: columnIndex,
+          columnIndex: column,
           value: value
         })
 
@@ -1673,11 +1684,17 @@ class VListView extends PureComponent {
 
 
     }.bind(this);
+
+    const checkFieldType = function (column){
+
+      return this.props.columns[column].field && this.props.columns[column].field.description.type === value_field_type
+    }.bind(this)
+
     if (direction === 'up') {
       this.props.group.forEach(function (value, index) {
         if (index < rowIndex) {
           // addCell(index)
-          if(!addCell(index)){
+          if(!addCell(index, columnIndex)){
             pending = true;
             return
           }
@@ -1688,7 +1705,7 @@ class VListView extends PureComponent {
     else if (direction === 'down') {
       this.props.group.forEach(function (value, index) {
         if (index > rowIndex) {
-          if(!addCell(index)){
+          if(!addCell(index, columnIndex)){
             pending = true;
             return
           }
@@ -1696,6 +1713,36 @@ class VListView extends PureComponent {
         }
 
       })
+    }
+    else if (direction === 'right'){
+      this.props.columns.forEach(function(value, index){
+        if (index > columnIndex) {
+          //Only copy values to same field types on row
+          if(checkFieldType(index)){
+              if(!addCell(rowIndex, index)){
+                pending = true;
+                return
+              }
+          }
+          
+
+        }
+      }.bind(this))
+    }
+    else if (direction === 'left'){
+      this.props.columns.forEach(function(value, index){
+        if (index < columnIndex) {
+          //Only copy values to same field types on row
+          if(checkFieldType(index)){
+              if(!addCell(rowIndex, index)){
+                pending = true;
+                return
+              }
+          }
+          
+
+        }
+      }.bind(this))
     }
 
     
@@ -1935,43 +1982,71 @@ class VListView extends PureComponent {
 
   }
 
+  setDraggedRange(rowIndex, columnIndex){
+        let sc = []
+
+        let rows_to_select = []
+        let columns_to_select = []
+
+        const origin_col = this.state.dragOrigin.columnIndex
+        const origin_row = this.state.dragOrigin.rowIndex
+        // let col_dif = columnIndex - this.state.editedColumn
+        // let row_dif = rowIndex - this.state.editedRow
+        let col_dif = columnIndex - origin_col
+        let row_dif = rowIndex  - origin_row
+
+
+        if (col_dif >= 0) {
+            let col_to_select = origin_col
+            while (col_to_select <= columnIndex) {
+                columns_to_select.push(col_to_select)
+                col_to_select = col_to_select + 1
+            }
+
+        }
+
+        if (col_dif < 0) {
+            let col_to_select = origin_col
+            while (col_to_select >= columnIndex) {
+                columns_to_select.push(col_to_select)
+                col_to_select = col_to_select - 1
+            }
+
+        }
+
+        if (row_dif >= 0) {
+            let row_to_select = origin_row
+            while (row_to_select <= rowIndex) {
+                rows_to_select.push(row_to_select)
+                row_to_select = row_to_select + 1
+            }
+        }
+
+        if (row_dif < 0) {
+            let row_to_select = origin_row
+            while (row_to_select >= rowIndex) {
+                rows_to_select.push(row_to_select)
+                row_to_select = row_to_select - 1
+            }
+        }
+
+        rows_to_select.forEach(function (row) {
+            columns_to_select.forEach(function (col) {
+                sc.push({
+                  columnIndex: col,
+                  rowIndex: row
+                })
+                
+            })
+        })
+      return sc
+  }
+
   setDragedCells(rowIndex, columnIndex) {
 
-    //only copy on columns: 
-    //TODO: rowCopy
-    if (columnIndex !== this.state.dragOrigin.columnIndex) {
-      return
-    }
-    const dragedCells = []
-    let rows_to_select = []
-    let row_dif = rowIndex - this.state.editedRow
+    const dragged = this.setDraggedRange(rowIndex, columnIndex);
+    this.setState({ dragedCells: dragged })
 
-    if (row_dif >= 0) {
-      let row_to_select = this.state.editedRow
-      while (row_to_select <= rowIndex) {
-        rows_to_select.push(row_to_select)
-        row_to_select = row_to_select + 1
-      }
-    }
-
-    if (row_dif < 0) {
-      let row_to_select = this.state.editedRow
-      while (row_to_select >= rowIndex) {
-        rows_to_select.push(row_to_select)
-        row_to_select = row_to_select - 1
-      }
-    }
-
-    rows_to_select.forEach(function (row) {
-      dragedCells.push({
-        columnIndex: columnIndex,
-        rowIndex: row
-      })
-    })
-
-    this.setState({ dragedCells: dragedCells })
-
-    return true
   }
 
 
@@ -2974,7 +3049,7 @@ class VListView extends PureComponent {
                     contextOpen={this.state.contextOpen}
                     hideContextMenu={this.hideContextMenu}
                     editable={this.props.editable}
-                    copyToColumn={this.copyToColumn} />
+                    copyTo={this.copyTo} />
                 }
                 <div
                   className="LeftSideGridContainer"
@@ -3180,31 +3255,31 @@ class VListView extends PureComponent {
         >
           <div className="modal-title" style={{ paddingLeft: '0px' }}> {Sao.i18n.gettext('Warning')}</div>
           <div style={{ marginTop: '1rem' }}>
-          <p>{window.Sao.i18n.gettext('There are cells with values in the column')}</p>
+          <p>{window.Sao.i18n.gettext('There are cells with values in the selected row or column')}</p>
           </div>
          
           <div className="pt-6" style={{ display: 'flex', marginBottom:'1rem' }}>
             <Button
-              style={{ lineHeight: 1.5, backgroundColor: "#e7e7e7", color: "rgb(40,80,146)", marginRight:'5px' }}
+              style={{ lineHeight: 1.5, backgroundColor: "#e7e7e7", color: "rgb(40,80,146)", marginRight:'5px', padding:"5px", paddingRight:"10px", paddingLeft:"10px" }}
               onClick={() => { this.setState({ copyConfirmationModal: false }) }}
               states={{}}
               label={window.Sao.i18n.gettext('Cancel')}
             />
             <Button
-              style={{ lineHeight: 1.5, backgroundColor: '#e7e7e7', color:'red', marginRight:'5px' }}
+              style={{ lineHeight: 1.5, backgroundColor: '#e7e7e7', color:'red', marginRight:'5px', padding:"5px", paddingRight:"10px", paddingLeft:"10px"  }}
               onClick={function (e) { 
                 const copyInfo = this.state.pendingCopy;
-                this.copyToColumn(copyInfo.direction, copyInfo.rowIndex,copyInfo.columnIndex, 'replace_all') 
+                this.copyTo(copyInfo.direction, copyInfo.rowIndex,copyInfo.columnIndex, 'replace_all') 
                 this.setState({ copyConfirmationModal: false })
               }.bind(this)}
               states={{}}
               label={window.Sao.i18n.gettext('Replace All')}
             />
             <Button
-              style={{ lineHeight: 1.5 }}
+              style={{ lineHeight: 1.5, padding:"5px", paddingRight:"10px", paddingLeft:"10px"  }}
               onClick={function (e) { 
                 const copyInfo = this.state.pendingCopy;
-                this.copyToColumn(copyInfo.direction, copyInfo.rowIndex,copyInfo.columnIndex, 'empty_cells') 
+                this.copyTo(copyInfo.direction, copyInfo.rowIndex,copyInfo.columnIndex, 'empty_cells') 
                 this.setState({ copyConfirmationModal: false })
               }.bind(this)}
               states={{}}

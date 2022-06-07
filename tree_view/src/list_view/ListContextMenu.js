@@ -8,6 +8,8 @@ import { faFolderOpen } from '@fortawesome/free-solid-svg-icons'
 import { faPaperclip } from '@fortawesome/free-solid-svg-icons'
 import { faArrowDown } from '@fortawesome/free-solid-svg-icons';
 import { faArrowUp } from '@fortawesome/free-solid-svg-icons';
+import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 
 
 import { Menu, Item, Submenu, Separator } from 'react-contexify';
@@ -145,10 +147,12 @@ class ListContextMenu extends PureComponent {
         <Item key="copy" onClick={({ event, props }) => { this.props.copySingle(this.props.screen.current_record) }}> <FontAwesomeIcon style={{ color: "rgb(40,80,146)", fontSize: "20px", marginRight: '5px', fontStyle: 'normal' }} icon={faCopy} />  {window.Sao.i18n.gettext('Copy')}  </Item>
         <Item key="copy-selection" onClick={({ event, props }) => { this.props.copySelection() }}> <FontAwesomeIcon style={{ color: "rgb(40,80,146)", fontSize: "20px", marginRight: '5px', fontStyle: 'normal' }} icon={faCopy} />  {window.Sao.i18n.gettext('Copy Selection')}  </Item>
         {this.props.editable &&
-        // <Item key="copy-value" onClick={({ event, props }) => { this.props.copyToColumn() }}> <FontAwesomeIcon style={{ color: "rgb(40,80,146)", fontSize: "20px", marginRight: '5px', fontStyle: 'normal' }} icon={faCopy} />  {window.Sao.i18n.gettext('Copy Value')}  </Item>
+        // <Item key="copy-value" onClick={({ event, props }) => { this.props.copyTo() }}> <FontAwesomeIcon style={{ color: "rgb(40,80,146)", fontSize: "20px", marginRight: '5px', fontStyle: 'normal' }} icon={faCopy} />  {window.Sao.i18n.gettext('Copy Value')}  </Item>
         <Submenu key={'copy-value'}  label={window.Sao.i18n.gettext('Cell')}>
-          <Item key="copy-value-up" onClick={({ event, props }) => { this.props.copyToColumn('up',props.rowIndex,props.columnIndex) }}> <FontAwesomeIcon style={{ color: "rgb(40,80,146)", fontSize: "20px", marginRight: '5px', fontStyle: 'normal' }} icon={faArrowUp} />  {window.Sao.i18n.gettext('Copy Up')}  </Item>
-          <Item key="copy-value-down" onClick={({ event, props }) => { this.props.copyToColumn('down', props.rowIndex,props.columnIndex) }}> <FontAwesomeIcon style={{ color: "rgb(40,80,146)", fontSize: "20px", marginRight: '5px', fontStyle: 'normal' }} icon={faArrowDown} />  {window.Sao.i18n.gettext('Copy Down')}  </Item>
+          <Item key="copy-value-up" onClick={({ event, props }) => { this.props.copyTo('up',props.rowIndex,props.columnIndex) }}> <FontAwesomeIcon style={{ color: "rgb(40,80,146)", fontSize: "20px", marginRight: '5px', fontStyle: 'normal' }} icon={faArrowUp} />  {window.Sao.i18n.gettext('Copy Up')}  </Item>
+          <Item key="copy-value-down" onClick={({ event, props }) => { this.props.copyTo('down', props.rowIndex,props.columnIndex) }}> <FontAwesomeIcon style={{ color: "rgb(40,80,146)", fontSize: "20px", marginRight: '5px', fontStyle: 'normal' }} icon={faArrowDown} />  {window.Sao.i18n.gettext('Copy Down')}  </Item>
+          <Item key="copy-value-right" onClick={({ event, props }) => { this.props.copyTo('right', props.rowIndex,props.columnIndex) }}> <FontAwesomeIcon style={{ color: "rgb(40,80,146)", fontSize: "20px", marginRight: '5px', fontStyle: 'normal' }} icon={faArrowRight} />  {window.Sao.i18n.gettext('Copy Right')}  </Item>
+          <Item key="copy-value-left" onClick={({ event, props }) => { this.props.copyTo('left', props.rowIndex,props.columnIndex) }}> <FontAwesomeIcon style={{ color: "rgb(40,80,146)", fontSize: "20px", marginRight: '5px', fontStyle: 'normal' }} icon={faArrowLeft} />  {window.Sao.i18n.gettext('Copy Left')}  </Item>
           
 
         </Submenu>

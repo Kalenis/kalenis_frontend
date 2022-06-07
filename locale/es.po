@@ -660,8 +660,14 @@ msgstr "Copiar Arriba"
 msgid "Copy Down"
 msgstr "Copiar Abajo"
 
-msgid "There are cells with values in the column"
-msgstr "Existen celdas con valores en la columna"
+msgid "Copy Right"
+msgstr "Copiar a la Derecha"
+
+msgid "Copy Left"
+msgstr "Copiar a la Izquierda"
+
+msgid "There are cells with values in the selected row or column"
+msgstr "Existen celdas con valores en la fila o columna seleccionada"
 
 msgid "Replace All"
 msgstr "Reemplazar todo"

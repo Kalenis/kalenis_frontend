@@ -25,7 +25,7 @@ const WithCopyDrag = (props) => {
       {props.children}
       {!props.readonly &&
         <Draggable
-          axis='y'
+          axis='both'
           defaultClassName='copyDrag'
           // defaultClassNameDragging='DragHandleActive'
           
