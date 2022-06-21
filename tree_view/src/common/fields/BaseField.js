@@ -4,7 +4,7 @@ import React, {  useState, useEffect } from 'react';
 const types = {
     'char':{type:'', validateKey:false, caretPosition:true},
     'text':{type:'', validateKey:false, caretPosition:true},
-    'float':{type:'', align:'right', validateKey:(key)=>{return /[0-9]|[-]|[.]|[,]|[e]|[E]/.test(key) }, caretPosition:true, formatValue:(value)=>{return parseFloat(value)}},
+    'float':{type:'',inputmode:"numeric", align:'right', validateKey:(key)=>{return /[0-9]|[-]|[.]|[,]|[e]|[E]/.test(key) }, caretPosition:true, formatValue:(value)=>{return parseFloat(value)}},
     'integer':{type:'number', align:'right', validateKey:(key)=>{return /^\d+$/.test(key) }, caretPosition:false},
     'time':{type:'', validateKey:false, caretPosition:true}
 }
@@ -74,7 +74,6 @@ function BaseField(props) {
 
     function handleBlur(e){
        
-
         if(touched){
             props.setValue(e.target.value)
         }
@@ -151,6 +150,7 @@ function BaseField(props) {
               onPaste={onPaste}
               type={fieldType.type}
               style={{textAlign:fieldType.align || 'left'}}
+              inputMode={fieldType.inputmode}
              
               
               >    

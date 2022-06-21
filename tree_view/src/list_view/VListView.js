@@ -149,6 +149,7 @@ class VListView extends PureComponent {
     this.reloadRow = this.reloadRow.bind(this);
     this.navigateGrid = this.navigateGrid.bind(this);
     this.focusInputCell = this.focusInputCell.bind(this);
+    this.blurInputCell = this.blurInputCell.bind(this);
     this.getAccess = this.getAccess.bind(this);
     this.createNewLIne = this.createNewLIne.bind(this);
     this.editableRefs = {}
@@ -1361,6 +1362,21 @@ class VListView extends PureComponent {
     // }
   }
 
+  blurInputCell(rowIndex, columnIndex){
+    if (!rowIndex) {
+      rowIndex = this.state.editedRow
+    }
+    if (!columnIndex) {
+      columnIndex = this.state.editedColumn
+    }
+    var coord = rowIndex.toString().concat(columnIndex.toString())
+
+    if (this.editableRefs[coord]) {
+      this.editableRefs[coord].blur()
+
+    }
+  }
+
   startDragCopy({ deltaX, lastX, columnIndex, rowIndex }) {
 
     this.setState({
@@ -1562,7 +1578,8 @@ class VListView extends PureComponent {
 
   handleContextMenu(e, rowIndex, columnIndex) {
     e.preventDefault()
-
+    e.stopPropagation()
+    this.blurInputCell(rowIndex, columnIndex)
     this.props.currentScreen.current_record = this.props.group[rowIndex]
 
     this.setState({ contextOpen: true, currentRecord: this.props.group[rowIndex] })
@@ -1575,6 +1592,8 @@ class VListView extends PureComponent {
 
       }
     });
+    
+   
 
 
 
@@ -2432,8 +2451,8 @@ class VListView extends PureComponent {
         onDoubleClick={cell_state.readonly ? function (e) { this.handleDoubleClick(e, rowIndex) }.bind(this) : () => { return true }}
         onContextMenu={function (e) { this.handleContextMenu(e, rowIndex, columnIndex) }.bind(this)}
         onMouseOver={function (e) { this.hoverGrid(e, rowIndex, columnIndex) }.bind(this)}
+        
         onClick={function (e) {
-
           if (this.props.type !== 'list_view') {
 
             if (!this.props.field_instance._readonly) {
