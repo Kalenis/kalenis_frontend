@@ -1138,6 +1138,7 @@ class TreeView extends PureComponent {
               // screen={this.props.sao_props.screen}
               records_qty ={this.props.sao_props.screen.limit}
               changeViewLimit = {this.changeViewLimit}
+              board_child = {this.props.sao_props.screen.board_child}
             />
           </Portal>
           :
@@ -1168,6 +1169,7 @@ class TreeView extends PureComponent {
               setModified={this.setCurrentModified}
               current_view={this.state.current_view}
               list_view_style={this.state.list_style}
+              board_child = {this.props.sao_props.screen.board_child}
             />
 
             {this.state.open_order_modal &&

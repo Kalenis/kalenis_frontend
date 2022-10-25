@@ -258,8 +258,16 @@ class VListView extends PureComponent {
   getHeight = () => {
 
     let margin = Math.min(250, window.innerHeight * 0.35)
+    let height;
+    if(this.props.board_child){
+      height = (window.innerHeight*25)/100
+    }
+    else{
+      height = this.props.type === 'list_view' ? window.innerHeight - margin : this.props.field_instance.attributes.height ? this.props.field_instance.attributes.height : (window.innerHeight * 30) / 100
+    }
+    
     this.setState({
-      height: this.props.type === 'list_view' ? window.innerHeight - margin : this.props.field_instance.attributes.height ? this.props.field_instance.attributes.height : (window.innerHeight * 30) / 100,
+      height:height,
       current_height: window.innerHeight
     })
   }

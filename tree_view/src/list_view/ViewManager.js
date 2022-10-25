@@ -64,6 +64,68 @@ const ListViewStyles = {
 
 }
 
+const BoardStyle = {
+    menu: (provided, state) => ({
+        ...provided,
+        borderRadius: '0px',
+        marginTop: '0px'
+    }),
+    container: (provided, state) => ({
+        ...provided,
+        // width: '80%'
+    }),
+
+    control: (provided, state) => ({
+
+        ...provided,
+
+        height: '100%',
+        // minHeight: '1px',
+        backgroundColor: 'transparent',
+        border: 'none',
+        minHeight: '0px'
+
+    }),
+    menu: (provided, state) => ({
+        ...provided,
+        width: '150px'
+    }),
+    menuPortal: (provided, state) => ({
+        ...provided,
+        zIndex: 9999
+    }),
+
+    valueContainer: (provided, state) => ({
+        ...provided,
+        height: '20px',
+        display: 'none'
+
+    }),
+    indicatorsContainer: (provided, state) => ({
+        ...provided,
+        backgroundColor: 'transparent',
+        // color:'white'
+        // height: '30px'
+    }),
+    // dropdownIndicator: (provided, state) => ({
+    //     ...provided,
+    //     // backgroundColor: 'transparent',
+    //     color: 'white',
+    //     ':hover': {
+
+    //         color: 'white',
+    //     },
+    //     // height: '30px'
+    // }),
+    indicatorSeparator: (provided, state) => ({
+        // ...provided,
+        display: 'none'
+        // height: '30px'
+    }),
+
+
+}
+
 const One2ManyStyles = {
     menu: (provided, state) => ({
         ...provided,
@@ -571,6 +633,22 @@ function ViewManager(props) {
         
         props.changeViewLimit(value.value)
     }
+    const componentStyle = () => {
+
+        if(props.widget_type === 'list_view'){
+            if(!props.board_child){
+                return ListViewStyles
+            }
+            else{
+
+                return BoardStyle
+            }
+        }
+        else{
+            return One2ManyStyles
+        }
+
+    }
    
 
 
@@ -581,7 +659,8 @@ function ViewManager(props) {
                     isSearchable={false}
                     value={records_qty}
                     components={{  Option: CustomSelectOption }}
-                    styles={props.widget_type === 'list_view' ? ListViewStyles : One2ManyStyles}
+                    // styles={props.widget_type === 'list_view' ? ListViewStyles : One2ManyStyles}
+                    styles={componentStyle()}
                     menuPortalTarget={document.body}
                     // menuPortalTarget={document.getElementById(props.target)}
                     menuPosition={'fixed'}

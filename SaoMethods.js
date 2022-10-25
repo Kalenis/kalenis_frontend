@@ -287,7 +287,7 @@ Sao.Tab.create = function (attributes, new_browser_tab) {
 
 Sao.Tab.prototype.create_toolbar = function () {
     //hide toolbar if kalenis_board in context. form-board views
-    var toolbar_class = this.screen.context.kalenis_board ?
+    var toolbar_class = (this.screen && this.screen.context.kalenis_board) ?
         'invisible'
         :
         'toolbar navbar navbar-default';
@@ -2080,8 +2080,9 @@ Sao.Screen.prototype.init = function (model_name, attributes) {
         this.attributes.readonly = true;
     }
     this.search_count = 0;
+    this.board_child = attributes.board_child || false;
     this.screen_container = new Sao.ScreenContainer(
-        attributes.tab_domain);
+        attributes.tab_domain, this.board_child);
 
     this.context_screen = null;
     if (attributes.context_model) {
@@ -2249,7 +2250,7 @@ Sao.Screen.prototype.switch_view = function (view_type, view_id) {
 };
 
 
-Sao.ScreenContainer.prototype.init = function (tab_domain) {
+Sao.ScreenContainer.prototype.init = function (tab_domain, board_child) {
     this.alternate_viewport = jQuery('<div/>', {
         'class': 'screen-container'
     });
@@ -2394,10 +2395,10 @@ Sao.ScreenContainer.prototype.init = function (tab_domain) {
             'class': 'col-sm-11 col-xs-12'
         }).appendTo(search_row));
 
-
     this.but_prev = jQuery('<button/>', {
         type: 'button',
         'class': 'btn btn-default btn-sm',
+        'style':board_child ? "display:none":"",
         'aria-label': Sao.i18n.gettext("Previous"),
         'title': Sao.i18n.gettext("Previous"),
     }).append(Sao.common.ICONFACTORY.get_icon_img('tryton-back', {
@@ -2407,6 +2408,7 @@ Sao.ScreenContainer.prototype.init = function (tab_domain) {
     this.but_next = jQuery('<button/>', {
         type: 'button',
         'class': 'btn btn-default btn-sm',
+        'style':board_child ? "display:none":"",
         'aria-label': Sao.i18n.gettext("Next"),
         'title': Sao.i18n.gettext("Next"),
     }).append(Sao.common.ICONFACTORY.get_icon_img('tryton-forward', {
@@ -3364,3 +3366,111 @@ Sao.Action.exec_action = function (action, data, context) {
 
 //End Action.js
 
+// board.js
+Sao.View.BoardXMLViewParser.prototype._parse_action =  function(node, attributes) {
+    var action;
+    if (attributes.yexpand === undefined) {
+        attributes.yexpand = true;
+    }
+    if (attributes.yfill === undefined) {
+        attributes.yfill = true;
+    }
+    action = new Sao.View.Board.Action(attributes, this.view.context);
+    this.view.actions.push(action);
+    this.container.add(action, attributes);
+    // Added
+    this.container.resize();
+};
+
+Sao.View.Board.Action.prototype.init = function(attributes, context) {
+    if (context === undefined) {
+        context = {};
+    }
+    var model, action_prm, act_window;
+    var decoder, search_context, search_value;
+
+    this.name = attributes.name;
+    this.context = jQuery.extend({}, context);
+
+    act_window = new Sao.Model('ir.action.act_window');
+    this.action_prm = act_window.execute('get', [this.name],
+            this.context);
+    this.action_prm.done(function(action) {
+        var i, len;
+        var view_ids, decoder, search_context;
+        var screen_attributes, action_modes;
+
+        this.action = action;
+        this.action.mode = [];
+        view_ids = [];
+        if ((this.action.views || []).length > 0) {
+            for (i = 0, len = this.action.views.length; i < len; i++) {
+                view_ids.push(this.action.views[i][0]);
+                this.action.mode.push(this.action.views[i][1]);
+            }
+        } else if (this.action.view_id !== undefined) {
+            view_ids = [this.action.view_id[0]];
+        }
+
+        if ('mode' in attributes) {
+            this.action.mode = attributes.mode;
+        }
+
+        if (!('pyson_domain' in this.action)) {
+            this.action.pyson_domain = '[]';
+        }
+
+        jQuery.extend(this.context,
+                Sao.Session.current_session.context);
+        this.context._user = Sao.Session.current_session.user_id;
+        decoder = new Sao.PYSON.Decoder(this.context);
+        jQuery.extend(this.context,
+                decoder.decode(this.action.pyson_context || '{}'));
+        decoder = new Sao.PYSON.Decoder(this.context);
+        jQuery.extend(this.context,
+                decoder.decode(this.action.pyson_context || '{}'));
+
+        this.domain = [];
+        this.update_domain([]);
+
+        search_context = jQuery.extend({}, this.context);
+        search_context.context = this.context;
+        search_context._user = Sao.Session.current_session.user_id;
+        decoder = new Sao.PYSON.Decoder(search_context);
+        search_value = decoder.decode(
+                this.action.pyson_search_value || '[]');
+
+        screen_attributes = {
+            mode: this.action.mode,
+            context: this.context,
+            view_ids: view_ids,
+            domain: this.domain,
+            search_value: search_value,
+            row_activate: this.row_activate.bind(this),
+            board_child:true,
+        };
+        this.screen = new Sao.Screen(this.action.res_model,
+                screen_attributes);
+
+        if (attributes.string) {
+            this.title.html(attributes.string);
+        } else {
+            this.title.html(this.action.name);
+        }
+        this.screen.switch_view().done(function() {
+            this.body.append(this.screen.screen_container.el);
+            this.screen.search_filter();
+        }.bind(this));
+    }.bind(this));
+    this.el = jQuery('<div/>', {
+        'class': 'board-action panel panel-board',
+    });
+    this.title = jQuery('<div/>', {
+        'class': 'panel-heading-board',
+    });
+    this.el.append(this.title);
+    this.body = jQuery('<div/>', {
+        'class': 'panel-body-board',
+    });
+    this.el.append(this.body);
+};

@@ -452,3 +452,37 @@ body{
 .invisible {
     display:none;
 }
+
+/* Board rules */
+
+.panel-heading-board{
+    background-color:transparent;
+    /* color: #999; */
+    /* color:var(--primary-color); */
+    color:rgba(113,128,150,1);
+    font-size:16px;
+    background:white;
+    padding:5px;
+    padding-top:10px;
+    padding-left:10px;
+
+
+
+}
+.panel-board{
+    background:white;
+    box-shadow:0 20px 25px -5px rgb(0 0 0 / 10%), 0 10px 10px -5px rgb(0 0 0 / 4%)
+
+
+}
+
+.panel-body-board{
+    padding:10px;
+    padding-right:15px;
+    background-color:white;
+}
+
+.board td {
+    /* max-height:none !important; */
+    padding:0 15px;
+}
