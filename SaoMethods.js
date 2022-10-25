@@ -1808,13 +1808,20 @@ Sao.Record.prototype.set_on_change = function (values) {
             var related = fieldname + '.';
             //kalenis: The original version doesnt add the values, instead, it perform multiple reads. 
             // this increase perf
-            var rec_name = fieldname + '.rec_name';
-            // this._values[related] = values[related] || {};
-
-            this._values[related] = { id: values[fieldname], rec_name: values[rec_name] };
-
-
-
+            // Try to recover rec_name from data
+            var rec_name = '';
+            if(values[fieldname + '.rec_name']){
+                rec_name = values[rec_name];
+            }
+            else if (values[related]){
+                
+                if( typeof values[related] === 'object' &&
+                    !Array.isArray(values[related]) &&
+                    values[related] !== null){
+                    rec_name = values[related].rec_name;
+                }
+            }
+            this._values[related] = { id: values[fieldname], rec_name: rec_name };
         }
 
         //kalenis: Fixes domains calculated in o2m/m2m  empty values. The original version creates multiples requests
