@@ -19,18 +19,20 @@ rm ./Gruntfile.js
 # ln -s ../Gruntfile.js
 cp ../Gruntfile.js .
 
+
 # add es locales
 rm ./locale/es.po
 cd locale
 cp ../../locale/es.po .
 cd ..
 
-npm install grunt-po2json
+
 #here => npm install @sentry/browser @sentry/tracing
 npm install @sentry/browser
 npm install @sentry/tracing
-npm install --production
-
+# npm install --production
+npm install --production --legacy-peer-deps
+npm install grunt-po2json --legacy-peer-deps
 #Create backup image folder
 mkdir original_images
 cp images/* original_images/
@@ -57,7 +59,7 @@ cd tree_view
 npm install
 npm run build
 #HERE => update sentry release
-node sentry_release.js
+# node sentry_release.js
 
 
 # rm -r kalenis_addons/tree_view/node_modules

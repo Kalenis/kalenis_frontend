@@ -6,11 +6,11 @@
 // };
 
 
-Sentry.init({
-    dsn: "https://27064ae5153145de933be847ca775715@o1043307.ingest.sentry.io/6116624",
-    release:"rolling_release",
-    tracesSampleRate: 0.0,
-    });
+// Sentry.init({
+//     dsn: "https://27064ae5153145de933be847ca775715@o1043307.ingest.sentry.io/6116624",
+//     release:"rolling_release",
+//     tracesSampleRate: 0.0,
+//     });
     
 
 
@@ -50,8 +50,8 @@ Sao.common.direct_print = function (data, file_name) {
 //session.js
 
 Sao.Session.prototype.reload_context = function () {
-    var username = this.login + '-' + this.database;
-    Sentry.setUser({ username:username });
+    // var username = this.login + '-' + this.database;
+    // Sentry.setUser({ username:username });
     var args = {
         'method': 'model.res.user.get_preferences',
         'params': [true, {}]
