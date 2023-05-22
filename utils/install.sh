@@ -8,13 +8,17 @@ if [ -d "./sao" ]; then
     
 fi
 
-echo "Downloading SAO"
+echo "Downloading Tryton Monorepo"
 # hg clone https://hg.tryton.org/sao/ 
-git clone https://github.com/tryton/sao.git
+# git clone https://github.com/tryton/sao.git
 
-cd sao
+#Tryton monorepo
+git clone https://github.com/tryton/tryton.git
+cd tryton
+git checkout 6.6
+cp -r sao ..
+cd ../sao
 
-git checkout 6.0
 rm ./Gruntfile.js 
 # ln -s ../Gruntfile.js
 cp ../Gruntfile.js .

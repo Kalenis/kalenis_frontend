@@ -308,12 +308,26 @@ Sao.Tab.prototype.set_name= function(name) {
 
 Sao.Tab.Form.prototype.init = function (model_name, attributes) {
     Sao.Tab.Form._super.init.call(this, attributes);
+    attributes = jQuery.extend({}, attributes);
+    var name = attributes.name;
+    if (!name) {
+        name = Sao.common.MODELNAME.get(model_name);
+    }
+    this.set_name(name);
+    if (attributes.res_id) {
+        if (attributes.hasOwnProperty('tab_domain')) {
+            delete attributes.tab_domain;
+        }
+    }
+    attributes.breadcrumb = [name];
     var screen = new Sao.Screen(model_name, attributes);
-    screen.tab = this;
+    screen.windows.push(this);
+    // screen.tab = this;
     this.screen = screen;
     this.info_bar = new Sao.Window.InfoBar();
     this.create_tabcontent();
 
+    this.attachment_screen = null;
     screen.message_callback = this.record_message.bind(this);
     screen.switch_callback = function () {
         if (this === Sao.Tab.tabs.get_current()) {
@@ -741,60 +755,16 @@ Sao.Tab.Form.prototype.create_toolbar = function () {
 
 
 Sao.Tab.Form.prototype._close_allowed = function () {
-    
     if (this.screen.context.kalenis_board) {
         return jQuery.when();
     }
-    return this.modified_save();
-};
-
-Sao.Tab.Form.prototype.record_message = function(data) {
-    if (data) {
-        var name = "_";
-        if (data[0] !== 0) {
-            name = data[0];
+    return this.modified_save().then(null, function(result) {
+        if (result) {
+            return jQuery.Deferred().resolve();
+        } else {
+            return jQuery.Deferred().reject();
         }
-        var buttons = ['print', 'relate', 'email', 'save', 'attach'];
-        buttons.forEach(function(button_id){
-            var button = this.buttons[button_id];
-            //Kalenis: If no button, return: prevent to crash when checking can_be_sensitive of undefined
-            if(!button){
-                return;
-            }
-            var can_be_sensitive = button._can_be_sensitive;
-            if (can_be_sensitive === undefined) {
-                can_be_sensitive = true;
-            }
-            if ((button_id == 'print') ||
-                (button_id == 'relate') ||
-                (button_id == 'email')) {
-                can_be_sensitive |= this.screen.get_buttons().some(
-                    function(button) {
-                        var keyword = button.attributes.keyword || 'action';
-                        return keyword == button_id;
-                    });
-            } else if (button_id == 'save') {
-                can_be_sensitive &= !this.screen.readonly;
-            }
-            button.prop('disabled', !(data[0] && can_be_sensitive));
-        }.bind(this));
-        this.buttons.switch_.prop('disabled',
-            this.attributes.view_ids > 1);
-
-        this.menu_buttons.delete_.toggleClass(
-            'disabled', !this.screen.deletable);
-        this.menu_buttons.save.toggleClass(
-            'disabled', this.screen.readonly);
-
-        var msg = name + ' / ' + data[1];
-        if ((data[1] < data[2]) && (data[2] > this.screen.limit)) {
-            msg += Sao.i18n.gettext(' of ') + data[2];
-        }
-        this.status_label.text(msg).attr('title', msg);
-    }
-    this.info_bar.message();
-    // TODO activate_save
-    this.refresh_attachment_preview();
+    });
 };
 
 
@@ -934,66 +904,86 @@ Sao.Window.Form.prototype.init = function (screen, callback, kwargs) {
     var view_type = kwargs.view_type || 'form';
 
     this.switch_prm = this.screen.switch_view(view_type)
-        .done(function () {
+        .done(() => {
             if (kwargs.new_ &&
+                this.screen.current_view &&
                 (this.screen.current_view.view_type == view_type)) {
                 this.screen.new_(undefined, kwargs.rec_name);
             }
-        }.bind(this));
+        });
     var dialog = new Sao.Dialog('', 'window-form', 'lg', false);
     this.el = dialog.modal;
-    this.el.on('keydown', function (e) {
+    this.el.on('keydown', e => {
         if (e.which == Sao.common.ESC_KEYCODE) {
             e.preventDefault();
             this.response('RESPONSE_CANCEL');
         }
-    }.bind(this));
+    });
 
     var readonly = (this.screen.attributes.readonly ||
         this.screen.group.readonly);
 
+    this.but_ok = null;
+    this.but_new = null;
+
     this._initial_value = null;
+    this.view_type = view_type;
     if (view_type == 'form') {
         var button_text;
         if (kwargs.new_) {
             button_text = Sao.i18n.gettext('Delete');
         } else {
             button_text = Sao.i18n.gettext('Cancel');
-            this._initial_value = this.screen.current_record.get_eval();
+            var record = this.screen.current_record;
+            this._initial_value = record.get_on_change_value();
+            if (record.group.parent &&
+                record.model.fields[record.group.parent_name]) {
+                var parent_field = record.model.fields[
+                    record.group.parent_name];
+                this._initial_value[record.group.parent_name] = (
+                    parent_field.get_eval(record));
+            }
         }
 
         dialog.footer.append(jQuery('<button/>', {
             'class': 'btn btn-link',
-            'type': 'button'
-        }).append(button_text).click(function () {
+            'type': 'button',
+            'title': button_text,
+        }).text(button_text).click(() => {
             this.response('RESPONSE_CANCEL');
-        }.bind(this)));
+        }));
     }
 
     if (kwargs.new_ && this.many) {
         dialog.footer.append(jQuery('<button/>', {
             'class': 'btn btn-default',
-            'type': 'button'
-        }).append(Sao.i18n.gettext('New')).click(function () {
+            'type': 'button',
+            'title': Sao.i18n.gettext("New"),
+        }).text(Sao.i18n.gettext('New')).click(() => {
             this.response('RESPONSE_ACCEPT');
-        }.bind(this)));
+        }));
     }
 
     if (this.save_current) {
-        dialog.footer.append(jQuery('<button/>', {
+        this.but_ok = jQuery('<button/>', {
             'class': 'btn btn-primary',
-            'type': 'submit'
-        }).append(Sao.i18n.gettext('Save')));
+            'type': 'submit',
+            'title': Sao.i18n.gettext("Save"),
+        }).text(Sao.i18n.gettext('Save')).appendTo(dialog.footer);
+        if (!kwargs.new_) {
+            this.but_ok.addClass('disabled');
+        }
     } else {
-        dialog.footer.append(jQuery('<button/>', {
+        this.but_ok = jQuery('<button/>', {
             'class': 'btn btn-primary',
-            'type': 'submit'
-        }).append(Sao.i18n.gettext('OK')));
+            'type': 'submit',
+            'title': Sao.i18n.gettext("OK"),
+        }).text(Sao.i18n.gettext('OK')).appendTo(dialog.footer);
     }
-    dialog.content.submit(function (e) {
+    dialog.content.submit(e => {
         this.response('RESPONSE_OK');
         e.preventDefault();
-    }.bind(this));
+    });
 
     if (view_type == 'tree') {
         var menu = jQuery('<div/>', {
@@ -1013,29 +1003,44 @@ Sao.Window.Form.prototype.init = function (screen, callback, kwargs) {
         }).appendTo(group);
         var access = Sao.common.MODELACCESS.get(this.screen.model_name);
 
+        var disable_during = function(callback) {
+            return function(evt) {
+                var button = jQuery(evt.target);
+                button.prop('disabled', true);
+                (callback(evt) || jQuery.when())
+                    .always(function() {
+                        button.prop('disabled', false);
+                    });
+            };
+        };
+
         this.but_switch = jQuery('<button/>', {
             'class': 'btn btn-default btn-sm',
             'type': 'button',
-            'aria-label': Sao.i18n.gettext('Switch')
+            'aria-label': Sao.i18n.gettext("Switch"),
+            'title': Sao.i18n.gettext("Switch"),
         }).append(Sao.common.ICONFACTORY.get_icon_img('tryton-switch', {
             'aria-hidden': 'true',
             //kalenis added color
             'type': 'toolbar_icons'
         })
         ).appendTo(buttons);
-        this.but_switch.click(this.switch_.bind(this));
+        this.but_switch.click(
+            disable_during(this.switch_.bind(this)));
 
         this.but_previous = jQuery('<button/>', {
             'class': 'btn btn-default btn-sm',
             'type': 'button',
-            'aria-label': Sao.i18n.gettext('Previous')
+            'aria-label': Sao.i18n.gettext("Previous"),
+            'title': Sao.i18n.gettext("Previous"),
         }).append(Sao.common.ICONFACTORY.get_icon_img('tryton-back', {
             'aria-hidden': 'true',
             //kalenis added color
             'type': 'toolbar_icons'
         })
         ).appendTo(buttons);
-        this.but_previous.click(this.previous.bind(this));
+        this.but_previous.click(
+            disable_during(this.previous.bind(this)));
 
         this.label = jQuery('<span/>', {
             'class': 'badge'
@@ -1046,14 +1051,15 @@ Sao.Window.Form.prototype.init = function (screen, callback, kwargs) {
         this.but_next = jQuery('<button/>', {
             'class': 'btn btn-default btn-sm',
             'type': 'button',
-            'aria-label': Sao.i18n.gettext('Next')
+            'aria-label': Sao.i18n.gettext("Next"),
+            'title': Sao.i18n.gettext("Next"),
         }).append(Sao.common.ICONFACTORY.get_icon_img('tryton-forward', {
             'aria-hidden': 'true',
             //kalenis added color
             'type': 'toolbar_icons'
         })
         ).appendTo(buttons);
-        this.but_next.click(this.next.bind(this));
+        this.but_next.click(disable_during(this.next.bind(this)));
 
         if (this.domain) {
             this.wid_text.show();
@@ -1061,78 +1067,85 @@ Sao.Window.Form.prototype.init = function (screen, callback, kwargs) {
             this.but_add = jQuery('<button/>', {
                 'class': 'btn btn-default btn-sm',
                 'type': 'button',
-                'aria-label': Sao.i18n.gettext('Add')
+                'aria-label': Sao.i18n.gettext("Add"),
+                'title': Sao.i18n.gettext("Add"),
             }).append(Sao.common.ICONFACTORY.get_icon_img('tryton-add', {
                 'aria-hidden': 'true',
                 //kalenis added color
                 'type': 'toolbar_icons'
             })
             ).appendTo(buttons);
-            this.but_add.click(this.add.bind(this));
+            this.but_add.click(disable_during(this.add.bind(this)));
             this.but_add.prop('disabled', !access.read || readonly);
 
             this.but_remove = jQuery('<button/>', {
                 'class': 'btn btn-default btn-sm',
                 'type': 'button',
-                'aria-label': Sao.i18n.gettext('Remove')
+                'aria-label': Sao.i18n.gettext("Remove"),
+                'title': Sao.i18n.gettext("Remove"),
             }).append(Sao.common.ICONFACTORY.get_icon_img('tryton-remove', {
                 'aria-hidden': 'true',
                 //kalenis added color
                 'type': 'toolbar_icons'
             })
             ).appendTo(buttons);
-            this.but_remove.click(this.remove.bind(this));
+            this.but_remove.click(
+                disable_during(this.remove.bind(this)));
             this.but_remove.prop('disabled', !access.read || readonly);
         }
 
         this.but_new = jQuery('<button/>', {
             'class': 'btn btn-default btn-sm',
             'type': 'button',
-            'aria-label': Sao.i18n.gettext('New')
+            'aria-label': Sao.i18n.gettext("New"),
+            'title': Sao.i18n.gettext("New"),
         }).append(Sao.common.ICONFACTORY.get_icon_img('tryton-create', {
             'aria-hidden': 'true',
             //kalenis added color
             'type': 'toolbar_icons'
         })
         ).appendTo(buttons);
-        this.but_new.click(this.new_.bind(this));
+        this.but_new.click(disable_during(this.new_.bind(this)));
         this.but_new.prop('disabled', !access.create || readonly);
 
         this.but_del = jQuery('<button/>', {
             'class': 'btn btn-default btn-sm',
             'type': 'button',
-            'aria-label': Sao.i18n.gettext('Delete')
+            'aria-label': Sao.i18n.gettext("Delete"),
+            'title': Sao.i18n.gettext("Delete"),
         }).append(Sao.common.ICONFACTORY.get_icon_img('tryton-delete', {
             'aria-hidden': 'true',
             //kalenis added color
             'type': 'toolbar_icons'
         })
         ).appendTo(buttons);
-        this.but_del.click(this.delete_.bind(this));
+        this.but_del.click(disable_during(this.delete_.bind(this)));
         this.but_del.prop('disabled', !access['delete'] || readonly);
 
         this.but_undel = jQuery('<button/>', {
             'class': 'btn btn-default btn-sm',
             'type': 'button',
-            'aria-label': Sao.i18n.gettext('Undelete')
+            'aria-label': Sao.i18n.gettext("Undelete"),
+            'title': Sao.i18n.gettext("Undelete"),
         }).append(Sao.common.ICONFACTORY.get_icon_img('tryton-undo', {
             'aria-hidden': 'true',
             //kalenis added color
             'type': 'toolbar_icons'
         })
         ).appendTo(buttons);
-        this.but_undel.click(this.undelete.bind(this));
+        this.but_undel.click(disable_during(this.undelete.bind(this)));
         this.but_undel.prop('disabled', !access['delete'] || readonly);
 
-        this.screen.message_callback = this.record_label.bind(this);
+        // this.screen.message_callback = this.record_label.bind(this);
     }
 
     var content = jQuery('<div/>').appendTo(dialog.body);
 
     dialog.body.append(this.info_bar.el);
-
+    this.screen.windows.push(this);
+    
     this.switch_prm.done(function () {
-        if (this.screen.current_view.view_type != view_type) {
+        if (this.screen.current_view && this.screen.current_view.view_type != view_type) {
             this.destroy();
         } else {
             title_prm.done(dialog.add_title.bind(dialog));
@@ -1140,12 +1153,12 @@ Sao.Window.Form.prototype.init = function (screen, callback, kwargs) {
             this.el.modal('show');
         }
     }.bind(this));
-    this.el.on('shown.bs.modal', function (event) {
-        this.screen.display().done(function () {
+    this.el.on('shown.bs.modal', event => {
+        this.screen.display().done(() => {
             this.screen.set_cursor();
-        }.bind(this));
-    }.bind(this));
-    this.el.on('hidden.bs.modal', function (event) {
+        });
+    });
+    this.el.on('hidden.bs.modal', function(event) {
         jQuery(this).remove();
     });
 };
@@ -1265,6 +1278,17 @@ Sao.View.Form.One2Many.prototype.init = function (view, attributes) {
         'class': 'input-group-btn'
     }).appendTo(group);
 
+    var disable_during = function(callback) {
+        return function(evt) {
+            var button = jQuery(evt.target);
+            button.prop('disabled', true);
+            (callback(evt) || jQuery.when())
+                .always(function() {
+                    button.prop('disabled', false);
+                });
+        };
+    };
+
     this.but_switch = jQuery('<button/>', {
         'class': 'btn btn-default btn-sm',
         'type': 'button',
@@ -1276,7 +1300,7 @@ Sao.View.Form.One2Many.prototype.init = function (view, attributes) {
         'type': 'toolbar_icons'
     })
     ).appendTo(buttons);
-    this.but_switch.click(this.switch_.bind(this));
+    this.but_switch.click(disable_during(this.switch_.bind(this)));
 
     this.but_previous = jQuery('<button/>', {
         'class': 'btn btn-default btn-sm',
@@ -1289,7 +1313,7 @@ Sao.View.Form.One2Many.prototype.init = function (view, attributes) {
         'type': 'toolbar_icons'
     })
     ).appendTo(buttons);
-    this.but_previous.click(this.previous.bind(this));
+    this.but_previous.click(disable_during(this.previous.bind(this)));
 
     this.label = jQuery('<span/>', {
         'class': 'badge',
@@ -1308,17 +1332,25 @@ Sao.View.Form.One2Many.prototype.init = function (view, attributes) {
         'type': 'toolbar_icons'
     })
     ).appendTo(buttons);
-    this.but_next.click(this.next.bind(this));
+    this.but_next.click(disable_during(this.next.bind(this)));
 
     if (attributes.add_remove) {
         this.wid_text = jQuery('<input/>', {
             type: 'text',
-            'class': 'form-control input-sm'
+            'class': 'form-control input-sm',
+            'name': attributes.name,
         }).appendTo(group);
-        // TODO add completion
-        //
-        //
-        buttons = jQuery('<div/>', {
+
+        if (!attributes.completion || attributes.completion == '1') {
+            Sao.common.get_completion(this.wid_text,
+                this._update_completion.bind(this),
+                this._completion_match_selected.bind(this),
+                this._completion_action_activated.bind(this),
+                this.read_access, this.create_access);
+            this.wid_completion = true;
+        }
+
+        buttons =  jQuery('<div/>', {
             'class': 'input-group-btn',
         }).appendTo(group);
 
@@ -1333,7 +1365,7 @@ Sao.View.Form.One2Many.prototype.init = function (view, attributes) {
             'type': 'toolbar_icons'
         })
         ).appendTo(buttons);
-        this.but_add.click(this.add.bind(this));
+        this.but_add.click(disable_during(this.add.bind(this)));
 
         this.but_remove = jQuery('<button/>', {
             'class': 'btn btn-default btn-sm',
@@ -1346,7 +1378,7 @@ Sao.View.Form.One2Many.prototype.init = function (view, attributes) {
             'type': 'toolbar_icons'
         })
         ).appendTo(buttons);
-        this.but_remove.click(this.remove.bind(this));
+        this.but_remove.click(disable_during(this.remove.bind(this)));
     }
 
     this.but_new = jQuery('<button/>', {
@@ -1360,7 +1392,7 @@ Sao.View.Form.One2Many.prototype.init = function (view, attributes) {
         'type': 'toolbar_icons'
     })
     ).appendTo(buttons);
-    this.but_new.click(this.new_.bind(this));
+    this.but_new.click(disable_during(this.new_.bind(this)));
 
     this.but_open = jQuery('<button/>', {
         'class': 'btn btn-default btn-sm',
@@ -1373,7 +1405,7 @@ Sao.View.Form.One2Many.prototype.init = function (view, attributes) {
         'type': 'toolbar_icons'
     })
     ).appendTo(buttons);
-    this.but_open.click(this.open.bind(this));
+    this.but_open.click(disable_during(this.open.bind(this)));
 
     this.but_del = jQuery('<button/>', {
         'class': 'btn btn-default btn-sm',
@@ -1386,7 +1418,7 @@ Sao.View.Form.One2Many.prototype.init = function (view, attributes) {
         'type': 'toolbar_icons'
     })
     ).appendTo(buttons);
-    this.but_del.click(this.delete_.bind(this));
+    this.but_del.click(disable_during(this.delete_.bind(this)));
 
     this.but_undel = jQuery('<button/>', {
         'class': 'btn btn-default btn-sm',
@@ -1399,7 +1431,7 @@ Sao.View.Form.One2Many.prototype.init = function (view, attributes) {
         'type': 'toolbar_icons'
     })
     ).appendTo(buttons);
-    this.but_undel.click(this.undelete.bind(this));
+    this.but_undel.click(disable_during(this.undelete.bind(this)));
 
     this.content = jQuery('<div/>', {
         'class': this.class_ + '-content panel-body'
@@ -1407,14 +1439,21 @@ Sao.View.Form.One2Many.prototype.init = function (view, attributes) {
     this.el.append(this.content);
 
     var modes = (attributes.mode || 'tree,form').split(',');
-    this.screen = new Sao.Screen(attributes.relation, {
+    var model = attributes.relation;
+    var breadcrumb = jQuery.extend([], this.view.screen.breadcrumb);
+    breadcrumb.push(
+        attributes.string || Sao.common.MODELNAME.get(model));
+    this.screen = new Sao.Screen(model, {
         mode: modes,
         view_ids: (attributes.view_ids || '').split(','),
         views_preload: attributes.views || {},
+        order: attributes.order,
         row_activate: this.activate.bind(this),
         exclude_field: attributes.relation_field || null,
         limit: null,
+        context: this.view.screen.context,
         pre_validate: attributes.pre_validate,
+        breadcrumb: breadcrumb,
         //kalenis
         field_type: 'o2m',
         field_name: this.el.attr('id'),
@@ -1423,12 +1462,15 @@ Sao.View.Form.One2Many.prototype.init = function (view, attributes) {
     });
     this.screen.pre_validate = attributes.pre_validate == 1;
 
-    this.screen.message_callback = this.record_label.bind(this);
-    this.prm = this.screen.switch_view(modes[0]).done(function () {
+    this.screen.windows.push(this);
+    this.prm = this.screen.switch_view().done(() => {
         this.content.append(this.screen.screen_container.el);
-    }.bind(this));
+    });
 
-    // TODO key_press
+    if (attributes.add_remove) {
+        // Use keydown to not receive focus-in TAB
+        this.wid_text.on('keydown', this.key_press.bind(this));
+    }
 
     this.but_switch.prop('disabled', this.screen.number_of_views <= 0);
 };
@@ -1572,17 +1614,10 @@ Sao.View.Form.Many2Many.prototype.init = function (view, attributes) {
     });
     this.menu.append(this.title);
 
-
-
-
-
     this.title.uniqueId();
     this.el.uniqueId();
     this.el.attr('aria-labelledby', this.title.attr('id'));
     this.title.attr('for', this.el.attr('id'));
-
-
-
 
     var toolbar = jQuery('<div/>', {
         'class': this.class_ + '-toolbar'
@@ -1592,25 +1627,22 @@ Sao.View.Form.Many2Many.prototype.init = function (view, attributes) {
     var group = jQuery('<div/>', {
         'class': 'input-group input-group-sm'
     }).appendTo(toolbar);
-
-
-
     this.entry = jQuery('<input/>', {
         type: 'text',
-        'class': 'form-control input-sm mousetrap'
+        'class': 'form-control input-sm mousetrap',
+        'name': attributes.name,
     }).appendTo(group);
     // Use keydown to not receive focus-in TAB
     this.entry.on('keydown', this.key_press.bind(this));
 
-    // TODO completion
-    //Kalenis => Completion
-
+    if (!attributes.completion || attributes.completion == '1') {
     Sao.common.get_completion(group,
         this._update_completion.bind(this),
         this._completion_match_selected.bind(this),
-        this._completion_action_activated.bind(this));
+            this._completion_action_activated.bind(this),
+            this.read_access, this.create_access);
     this.wid_completion = true;
-
+    }
 
     var buttons = jQuery('<div/>', {
         'class': 'input-group-btn'
@@ -1665,22 +1697,28 @@ Sao.View.Form.Many2Many.prototype.init = function (view, attributes) {
         'class': this.class_ + '-content panel-body'
     });
     this.el.append(this.content);
-
+    var model = attributes.relation;
+    var breadcrumb = jQuery.extend([], this.view.screen.breadcrumb);
+    breadcrumb.push(attributes.string || Sao.common.MODELNAME.get(model));
     this.screen = new Sao.Screen(attributes.relation, {
         mode: ['tree'],
         view_ids: (attributes.view_ids || '').split(','),
         views_preload: attributes.views || {},
+        order: attributes.order,
         row_activate: this.activate.bind(this),
+        readonly: true,
         limit: null,
+        context: this.view.screen.context,
+        breadcrumb: breadcrumb,
         //kalenis: added field name and types for render improvement
         field_name: this.el.attr('id'),
         field_type: 'm2m',
         field_instance: this
     });
-    this.screen.message_callback = this.record_label.bind(this);
-    this.prm = this.screen.switch_view('tree').done(function () {
+    this.screen.windows.push(this);
+    this.prm = this.screen.switch_view('tree').done(() => {
         this.content.append(this.screen.screen_container.el);
-    }.bind(this));
+    });
 };
 
 
@@ -2051,13 +2089,13 @@ Sao.Record.prototype.loadRange = function (name, view_limit, force_eager, grid_f
             }
             var value = id2value[id];
             if (record && value) {
-                for (var key in this._changed) {
-                    if (!this._changed.hasOwnProperty(key)) {
+                for (var key in this.modified_fields) {
+                    if (!this.modified_fields.hasOwnProperty(key)) {
                         continue;
                     }
                     delete value[key];
                 }
-                promises.push(record.set(value));
+                promises.push(record.set(value, false));
             }
         }
 
@@ -2247,7 +2285,7 @@ Sao.field.One2Many.prototype.validate = function (record, softvalidation, pre_va
             return false;
         }
     }
-
+    
     return test;
 };
 
@@ -2336,6 +2374,7 @@ Sao.Record.prototype.on_change_with = function (field_names) {
 
 Sao.Screen.prototype.init = function (model_name, attributes) {
     this.model_name = model_name;
+    this.windows = [];
     this.model = new Sao.Model(model_name, attributes);
     this.attributes = jQuery.extend({}, attributes);
     this.view_ids = jQuery.extend([], attributes.view_ids);
@@ -2373,6 +2412,7 @@ Sao.Screen.prototype.init = function (model_name, attributes) {
     this.search_count = 0;
     this.screen_container = new Sao.ScreenContainer(
         attributes.tab_domain);
+    this.breadcrumb = attributes.breadcrumb || [];
 
     this.context_screen = null;
     if (attributes.context_model) {
@@ -3139,7 +3179,7 @@ Sao.Window.Attachment.prototype.init = function (record, callback) {
         return Sao.i18n.gettext('Attachments (%1)', rec_name);
     });
     Sao.Window.Attachment._super.init.call(this, screen, this.callback,
-        { view_type: 'tree', title: title });
+        {view_type: 'tree', title: title});
     this.switch_prm = this.switch_prm.then(function () {
         return screen.search_filter();
     });
