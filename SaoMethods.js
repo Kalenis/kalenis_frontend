@@ -1784,6 +1784,10 @@ Sao.View.Form.TranslateDialog.prototype.init = function(languages, widget) {
             .filter(':visible').first().focus();
     });
 
+    dialog.modal.on('hide.bs.modal', function(){
+        jQuery(this).remove();
+    });
+
     //Bind escape key to close function
     dialog.modal.on('keydown', function(e) {
         if (e.which == Sao.common.ESC_KEYCODE) {
