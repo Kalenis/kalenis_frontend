@@ -3440,6 +3440,74 @@ Sao.View.Tree.Row.prototype.select_row = function (event_) {
 
 //Wizard.js
 
+Sao.Wizard.prototype.process =  function() {
+    // 6.6 compatibility:
+    if (this.__processing || this.__waiting_response) {
+        return;
+    }
+    var process = function() {
+        if (this.state == this.end_state) {
+            this.end();
+            return;
+        }
+        var ctx = jQuery.extend({}, this.context);
+        var data = {};
+        if (this.screen) {
+            data[this.screen_state] = this.screen.get_on_change_value();
+        }
+        Sao.rpc({
+            'method': 'wizard.' + this.action + '.execute',
+            'params': [this.session_id, data, this.state, ctx]
+        }, this.session).then(function(result) {
+            if (result.view) {
+                this.clean();
+                var view = result.view;
+                this.update(view.fields_view, view.buttons);
+                this.screen.new_(false).then(function() {
+                    var values = view.defaults || {};
+                    // 6.6 compatibility: Set default_values && values for compatibility
+                    if(view.values){
+                        values = Object.assign({}, values, view.values);
+                    }
+                    this.screen.current_record.set_default(values);
+                    this.update_buttons();
+                    this.screen.set_cursor();
+                }.bind(this));
+
+                this.screen_state = view.state;
+                this.__waiting_response = true;
+            } else {
+                this.state = this.end_state;
+            }
+
+            var execute_actions = function execute_actions() {
+                if (result.actions) {
+                    result.actions.forEach(function(action) {
+                        var context = jQuery.extend({}, this.context);
+                        // Remove wizard keys added by run
+                        delete context.active_id;
+                        delete context.active_ids;
+                        delete context.active_model;
+                        delete context.action_id;
+                        Sao.Action.execute(
+                            action[0], action[1], context);
+                    }.bind(this));
+                }
+            }.bind(this);
+
+            if (this.state == this.end_state) {
+                this.end().then(execute_actions);
+            } else {
+                execute_actions();
+            }
+            this.__processing = false;
+        }.bind(this), function(result) {
+            // TODO end for server error.
+            this.__processing = false;
+        }.bind(this));
+    };
+    process.call(this);
+};
 
 Sao.Wizard.prototype.response = function(definition) {
     this.__waiting_response = false;
