@@ -338,7 +338,6 @@ function HtmlField(props) {
         menubar: true,
         // content_css:'/kalenis_views/tree_view/build/test.css, /kalenis_views/tree_view/build/test2.css',
         inline: false,
-        
         browser_spellcheck: true,
         contextmenu:false,
         save_onsavecallback: () => { },
@@ -970,6 +969,7 @@ bullist numlist outdent indent | removeformat | help'
                     <Editor
                         initialValue={getValue()}
                         ref={editorRef}
+                        tinymceScriptSrc={process.env.PUBLIC_URL + '/tinymce/tinymce.min.js'}
                         disabled={states.readonly}
                         inline={states.readonly}
                         onInit={() => { setEditorReady(true) }}
