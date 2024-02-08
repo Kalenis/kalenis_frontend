@@ -1665,7 +1665,7 @@ class VListView extends PureComponent {
     }.bind(this)
     const hasValue = function (row, column) {
       const cell_value = this.props.group[row]._values[this.props.columns[column].attributes.name]
-      return cell_value !== null && cell_value !== ""
+      return cell_value !== null && cell_value !== "" && cell_value !== undefined
     }.bind(this);
 
     const addCell = function (row) {
