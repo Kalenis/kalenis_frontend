@@ -1150,7 +1150,174 @@ Sao.Window.Form.prototype.init = function (screen, callback, kwargs) {
     });
 };
 
+Sao.Window.EmailEntry.prototype.init = function(el, session, record) {
+    this.session = session;
+    // Kalenis: Add record to use on autocompletion
+    this.record = record;
+    Sao.Window.EmailEntry._super.init.call(
+        this, el,
+        this._email_source,
+        this._email_match_selected,
+        this._email_format);
+};
 
+Sao.Window.EmailEntry.prototype._email_source = function(text) {
+    if (this.input[0].selectionStart < this.input.val().length) {
+        return jQuery.when([]);
+    }
+    // Kalenis: Add record to use on autocompletion
+
+    return Sao.rpc({
+        'method': 'model.ir.email.complete',
+        'params': [
+            text, 
+            Sao.config.limit, 
+            [this.record.model.name, this.record.id],
+            {}],
+    }, this.session);
+};
+
+Sao.Window.Email.prototype.init = function(name, record, prints, template) {
+    this.record = record;
+    this.dialog = new Sao.Dialog(
+        Sao.i18n.gettext('E-mail %1', name), 'email', 'lg');
+    this.el = this.dialog.modal;
+    this.dialog.content.addClass('form-horizontal');
+
+    var body = this.dialog.body;
+    function add_group(name, label, required) {
+        var group = jQuery('<div/>', {
+            'class': 'form-group',
+        }).appendTo(body);
+        jQuery('<label/>', {
+            'class': 'control-label col-sm-1',
+            'text': label,
+            'for': 'email-' + name,
+        }).appendTo(group);
+        var input = jQuery('<input/>', {
+            'type': 'text',
+            'class':'form-control input-sm',
+            'id': 'email-' + name,
+        }).appendTo(jQuery('<div/>', {
+            'class': 'col-sm-11',
+        }).appendTo(group));
+        if (required) {
+            input.attr('required', true);
+        }
+        return input;
+    }
+
+    this.to = add_group('to', Sao.i18n.gettext('To:'), true);
+    this.cc = add_group('cc', Sao.i18n.gettext('Cc:'));
+    this.bcc = add_group('bcc', Sao.i18n.gettext('Bcc:'));
+    [this.to, this.cc, this.bcc].forEach(function(input) {
+        // Kalenis: Add record to use on autocompletion
+        new Sao.Window.EmailEntry(input, this.record.model.session, this.record);
+    }.bind(this));
+    this.subject = add_group(
+        'subject', Sao.i18n.gettext('Subject:'), true);
+
+    var panel = jQuery('<div/>', {
+        'class': 'panel panel-default',
+    }).appendTo(body
+    ).append(jQuery('<div/>', {
+        'class': 'panel-heading',
+    }).append(Sao.common.richtext_toolbar()));
+    this.body = jQuery('<div>', {
+        'class': 'email-richtext form-control input-sm mousetrap',
+        'contenteditable': true,
+        'spellcheck': true,
+        'id': 'email-body',
+    }).appendTo(jQuery('<div/>', {
+        'class': 'panel-body',
+    }).appendTo(panel));
+
+    var print_frame = jQuery('<div/>', {
+        'class': 'col-md-4',
+    }).appendTo(body);
+    jQuery('<label/>', {
+        'text': Sao.i18n.gettext("Reports"),
+    }).appendTo(print_frame);
+    this.print_actions = {};
+    for (var i = 0; i < prints.length; i++) {
+        var print = prints[i];
+        var print_check = jQuery('<input/>', {
+            'type': 'checkbox',
+        });
+        jQuery('<div/>', {
+            'class': 'checkbox',
+        }).append(jQuery('<label/>'
+        ).text(Sao.i18n.gettext(print.name)
+        ).prepend(print_check)).appendTo(print_frame);
+        this.print_actions[print.id] = print_check;
+    }
+
+    var attachment_frame = jQuery('<div/>', {
+        'class': 'col-md-4',
+    }).appendTo(body);
+    jQuery('<label/>', {
+        'text': Sao.i18n.gettext("Attachments"),
+    }).appendTo(attachment_frame);
+    this.attachments = jQuery('<select/>', {
+        'class': 'form-control input-sm',
+        'name': 'attachments',
+        'multiple': true,
+    }).appendTo(attachment_frame);
+    Sao.rpc({
+        'method': 'model.ir.attachment.search_read',
+        'params': [
+            [
+                ['resource', '=', record.model.name + ',' + record.id],
+                ['OR',
+                    ['data', '!=', null],
+                    ['file_id', '!=', null],
+                ],
+            ],
+            0, null, null, ['rec_name'], record.get_context()],
+    }, record.model.session).then(function(attachments) {
+        attachments.forEach(function(attachment) {
+            this.attachments.append(jQuery('<option/>', {
+                'value': JSON.stringify(attachment.id),
+                'text': attachment.rec_name,
+            }));
+        }.bind(this));
+    }.bind(this));
+
+    this.files = jQuery('<div/>', {
+        'class': 'col-md-4',
+    }).appendTo(body);
+    jQuery('<label/>', {
+        'text': Sao.i18n.gettext("Files"),
+    }).appendTo(this.files);
+    this._add_file_button();
+
+    jQuery('<button/>', {
+        'class': 'btn btn-link',
+        'type': 'button',
+    }).text(' ' + Sao.i18n.gettext('Cancel')).prepend(
+        Sao.common.ICONFACTORY.get_icon_img('tryton-cancel')
+    ).click(function() {
+        this.response('RESPONSE_CANCEL');
+    }.bind(this)).appendTo(this.dialog.footer);
+
+    jQuery('<button/>', {
+        'class': 'btn btn-primary',
+        'type': 'submit',
+    }).text(' ' + Sao.i18n.gettext('Send')).prepend(
+        Sao.common.ICONFACTORY.get_icon_img('tryton-send')
+    ).appendTo(this.dialog.footer);
+    this.dialog.content.submit(function(e) {
+        e.preventDefault();
+        this.response('RESPONSE_OK');
+    }.bind(this));
+
+    this._fill_with(template);
+
+    this.el.modal('show');
+    this.el.on('hidden.bs.modal', function() {
+        jQuery(this).remove();
+    });
+};
 
 // /view/form.js
 
@@ -1903,7 +2070,6 @@ Sao.View.parse = function (screen, view_id, type, xml, children_field) {
 // model.js
 
 Sao.Record.prototype.loadRange = function (name, view_limit, force_eager, grid_fields, prefixes, extra_fields) {
-
     var prm;
 
     if ((this.id < 0) || (name in this._loaded) && !grid_fields) {
