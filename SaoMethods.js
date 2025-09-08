@@ -1783,6 +1783,9 @@ Sao.View.Form.TranslateDialog.prototype.init = function(languages, widget) {
         dialog.modal.find('input,select')
             .filter(':visible').first().focus();
     });
+    dialog.modal.on('hide.bs.modal', function(){
+        jQuery(this).remove();
+    });
 
     //Bind escape key to close function
     dialog.modal.on('keydown', function(e) {
@@ -2296,7 +2299,7 @@ Sao.Record.prototype.on_change_with = function (field_names) {
         try {
             //Kalenis: Avoid to use single on_change_with in worksheets, solves bug with multiple workers
             if (fieldnames.length == 1 && this.model.name !=
-                'lims.interface.data') {
+                'lims.interface.data' && this.model.name != 'lims.interface.grouped_data') {
                 fieldname = fieldnames[0];
                 result = {};
                 result[fieldname] = this.model.execute(
