@@ -294,6 +294,7 @@ Sao.common.InputCompletion.prototype._set_selection = function (values) {
     }
 };
 
+
 ////////////////END common.js ///////////
 
 //tab.js
@@ -2088,7 +2089,6 @@ Sao.Record.prototype.loadRange = function (name, view_limit, force_eager, grid_f
 Sao.Record.prototype.set_on_change = function (values) {
     var fieldname, value;
 
-
     for (fieldname in values) {
         value = values[fieldname];
         if (!(fieldname in this.model.fields)) {
@@ -2124,7 +2124,6 @@ Sao.Record.prototype.set_on_change = function (values) {
                 }
             }
         }
-
 
 
         this.model.fields[fieldname].set_on_change(this, value);
@@ -2254,81 +2253,83 @@ Sao.field.One2Many.prototype.validate = function (record, softvalidation, pre_va
     return test;
 };
 
-Sao.Record.prototype.on_change_with = function (field_names) {
+// Sao.Record.prototype.on_change_with = function (field_names) {
 
-    var fieldnames = {};
-    var values = {};
-    var later = {};
-    var fieldname, on_change_with;
-    for (fieldname in this.model.fields) {
-        if (!this.model.fields.hasOwnProperty(fieldname)) {
-            continue;
-        }
-        on_change_with = this.model.fields[fieldname]
-            .description.on_change_with;
-        if (jQuery.isEmptyObject(on_change_with)) {
-            continue;
-        }
-        for (var i = 0; i < field_names.length; i++) {
-            if (~on_change_with.indexOf(field_names[i])) {
-                break;
-            }
-        }
-        if (i >= field_names.length) {
-            continue;
-        }
-        if (!jQuery.isEmptyObject(Sao.common.intersect(
-            Object.keys(fieldnames).sort(),
-            on_change_with.sort()))) {
-            later[fieldname] = true;
-            continue;
-        }
-        fieldnames[fieldname] = true;
-        values = jQuery.extend(values,
-            this._get_on_change_args(on_change_with));
-        if ((this.model.fields[fieldname] instanceof
-            Sao.field.Many2One) ||
-            (this.model.fields[fieldname] instanceof
-                Sao.field.Reference)) {
-            delete this._values[fieldname + '.'];
-        }
-    }
-    var result;
-    fieldnames = Object.keys(fieldnames);
-    if (fieldnames.length) {
-        try {
-            //Kalenis: Avoid to use single on_change_with in worksheets, solves bug with multiple workers
-            if (fieldnames.length == 1 && this.model.name !=
-                'lims.interface.data' && this.model.name != 'lims.interface.grouped_data') {
-                fieldname = fieldnames[0];
-                result = {};
-                result[fieldname] = this.model.execute(
-                    'on_change_with_' + fieldname,
-                    [values], this.get_context(), false);
-            } else {
-                result = this.model.execute(
-                    'on_change_with',
-                    [values, fieldnames], this.get_context(), false);
-            }
-        } catch (e) {
-            return;
-        }
-        this.set_on_change(result);
-    }
-    for (fieldname in later) {
-        on_change_with = this.model.fields[fieldname]
-            .description.on_change_with;
-        values = this._get_on_change_args(on_change_with);
-        try {
-            result = this.model.execute(
-                'on_change_with_' + fieldname,
-                [values], this.get_context(), false);
-        } catch (e) {
-            return;
-        }
-        this.model.fields[fieldname].set_on_change(this, result);
-    }
-};
+//     var fieldnames = {};
+//     var values = {};
+//     var later = {};
+//     var fieldname, on_change_with;
+//     for (fieldname in this.model.fields) {
+//         if (!this.model.fields.hasOwnProperty(fieldname)) {
+//             continue;
+//         }
+//         on_change_with = this.model.fields[fieldname]
+//             .description.on_change_with;
+//         if (jQuery.isEmptyObject(on_change_with)) {
+//             continue;
+//         }
+//         for (var i = 0; i < field_names.length; i++) {
+//             if (~on_change_with.indexOf(field_names[i])) {
+//                 break;
+//             }
+//         }
+//         if (i >= field_names.length) {
+//             continue;
+//         }
+//         if (!jQuery.isEmptyObject(Sao.common.intersect(
+//             Object.keys(fieldnames).sort(),
+//             on_change_with.sort()))) {
+//             later[fieldname] = true;
+//             continue;
+//         }
+//         fieldnames[fieldname] = true;
+//         values = jQuery.extend(values,
+//             this._get_on_change_args(on_change_with));
+//         if ((this.model.fields[fieldname] instanceof
+//             Sao.field.Many2One) ||
+//             (this.model.fields[fieldname] instanceof
+//                 Sao.field.Reference)) {
+//             delete this._values[fieldname + '.'];
+//         }
+//     }
+//     var result;
+//     fieldnames = Object.keys(fieldnames);
+//     if (fieldnames.length) {
+//         try {
+//             //Kalenis: Avoid to use single on_change_with in worksheets, solves bug with multiple workers
+//             if (fieldnames.length == 1 && this.model.name !=
+//                 'lims.interface.data' && this.model.name != 'lims.interface.grouped_data') {
+//                 fieldname = fieldnames[0];
+//                 result = {};
+//                 result[fieldname] = this.model.execute(
+//                     'on_change_with_' + fieldname,
+//                     [values], this.get_context(), false);
+//             } else {
+//                 result = this.model.execute(
+//                     'on_change_with',
+//                     [values, fieldnames], this.get_context(), false);
+//             }
+//         } catch (e) {
+//             return;
+//         }
+//         console.log("SAO MODIFIED: ON CHANGE WITH RESULT");
+//         console.log(result);
+//         this.set_on_change(result);
+//     }
+//     for (fieldname in later) {
+//         on_change_with = this.model.fields[fieldname]
+//             .description.on_change_with;
+//         values = this._get_on_change_args(on_change_with);
+//         try {
+//             result = this.model.execute(
+//                 'on_change_with_' + fieldname,
+//                 [values], this.get_context(), false);
+//         } catch (e) {
+//             return;
+//         }
+//         this.model.fields[fieldname].set_on_change(this, result);
+//     }
+// };
 
 
 
