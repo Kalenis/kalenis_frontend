@@ -217,6 +217,7 @@ Sao.Record.prototype.on_change_with = function(field_names) {
                 changed = this.model.execute(
                     'on_change_with',
                     [values, fieldnames], this.get_context(), false);
+                console.log("CHANGED ON ON CHANGE WITH: LINE 220", JSON.stringify(changed));
             }
         } catch (e) {
             return;
@@ -254,7 +255,10 @@ Sao.Record.prototype.on_change_with = function(field_names) {
             return;
         }
         this.set_on_change(changed);
+       
     }
+    console.log("CHANGED ON ON CHANGE WITH:", changed);
+    console.log("RECORD AFTER ON CHANGE WITH:", this._values);
 };
 
 Sao.View.Form.Text.prototype.display = function() {
@@ -276,37 +280,223 @@ Sao.View.Form.Text.prototype.display = function() {
     }
 };
 
-// Sao.Field.One2Many.prototype.get_on_change_value = function(record) {
-//     var result = [];
-//     var group = record._values[this.name];
-//     if (group === undefined) return result;
-//     for (var i = 0, len = record._values[this.name].length; i < len;
-//             i++) {
-//         var record2 = group[i];
-//         if (!record2.deleted && !record2.removed)
-//             result.push(record2.get_on_change_value(
-//                         [this.description.relation_field || '']));
-//     }
-//     return result;
-// };
+Sao.Window.Export.prototype.addreplace_predef = function() {
+    var fields = [];
+    console.log("ADD REPLACE EXPORT INHERITED !");
+    var selected_fields = this.fields_selected.children('li');
+    for(var i=0; i<selected_fields.length; i++) {
+        fields.push(selected_fields[i].getAttribute('path'));
+    }
+    if(fields.length === 0) {
+        return;
+    }
+    var pref_id;
 
+    var save = function(name) {
+        var prm;
+        var values = {
+            'header': this.el_add_field_names.is(':checked'),
+            'records': (
+                JSON.parse(this.selected_records.val()) ?
+                'selected' : 'listed'),
+        };
+        if (!pref_id) {
+            values.name = name;
+            values.resource = this.screen.model_name;
+            values.export_fields = fields.map(function(f) { return {'name': f}; });
+            prm = Sao.rpc({
+                method: 'model.ir.export.set',
+                params: [values, this.context],
+            }, this.session);
+        } else {
+            prm = Sao.rpc({
+                method: 'model.ir.export.update',
+                params: [pref_id, values, fields, this.context],
+            }, this.session).then(function() { return pref_id; });
+        }
+        return prm.then(function(pref_id) {
+            this.session.cache.clear(
+                'model.' + this.screen.model_name + '.view_toolbar_get');
+            this.predef_exports[pref_id] = {
+                'fields': fields,
+                'values': values,
+            };
+            if (selection.length === 0) {
+                this.add_to_predef(pref_id, name);
+            }
+        }.bind(this));
+    }.bind(this);
 
+    var selection = this.predef_exports_list.children('li.bg-primary');
+    if (selection.length === 0) {
+        pref_id = null;
+        Sao.common.ask.run(
+            Sao.i18n.gettext('What is the name of this export?'),
+            'export')
+        .then(save);
+    }
+    else {
+        pref_id = selection.attr('export_id');
+        Sao.common.sur.run(
+            Sao.i18n.gettext(
+                'Override %1 definition?', selection.text()))
+        .then(save);
+    }
+};
 
-// Sao.Field.One2Many.prototype._set_default_value =  function(record, model) {
-//     console.log("RUNNING INHERITED SET DEFAULT VALUE o2m");
-//     if (record._values[this.name] !== undefined) {
-//         return;
-//     }
-//     if (!model) {
-//         model = new Sao.Model(this.description.relation);
-//     }
-//     if (record.model.name == this.description.relation) {
-//         model = record.model;
-//     }
-//     var group = Sao.Group(model, {}, []);
-//     group.set_parent(record);
-//     group.parent_name = this.description.relation_field;
-//     group.child_name = this.name;
-//     group.parent_datetime_field = this.description.datetime_field;
-//     record._values[this.name] = group;
-// };
+Sao.common.selection_mixin.update_selection = function(record, field,
+    callback) {
+    var _update_selection = function() {
+        if (!field) {
+            if (callback) {
+                callback(this.selection, this.help);
+            }
+            return;
+        }
+        
+        var domain = [];
+        try{
+            domain = field.get_domain(record);
+        }catch(e){
+          console.log("-");
+        }
+        
+        if (!('relation' in this.attributes)) {
+            var change_with = this.attributes.selection_change_with || [];
+            var value = record._get_on_change_args(change_with);
+            delete value.id;
+            Sao.common.selection_mixin.init_selection.call(this, value,
+                    function() {
+                        Sao.common.selection_mixin.filter_selection.call(
+                                this, domain, record, field);
+                        if (callback) {
+                            callback(this.selection, this.help);
+                        }
+                    }.bind(this));
+        } else {
+            var context = field.get_context(record);
+            var jdomain = JSON.stringify([domain, context]);
+            if (jdomain in this._domain_cache) {
+                this.selection = this._domain_cache[jdomain];
+                this._last_domain = [domain, context];
+            }
+            if ((this._last_domain !== null) &&
+                    Sao.common.compare(domain, this._last_domain[0]) &&
+                    (JSON.stringify(context) ==
+                    JSON.stringify(this._last_domain[1]))) {
+                if (callback) {
+                    callback(this.selection, this.help);
+                }
+                return;
+            }
+            var fields = ['rec_name'];
+            var help_field = this.attributes.help_field;
+            if (help_field) {
+                fields.push(help_field);
+            }
+            var prm = Sao.rpc({
+                'method': 'model.' + this.attributes.relation +
+                    '.search_read',
+                'params': [domain, 0, null, null, fields, context]
+            }, record.model.session);
+            prm.done(function(result) {
+                var selection = [];
+                result.forEach(function(x) {
+                    selection.push([x.id, x.rec_name]);
+                });
+                if (this.nullable_widget) {
+                    selection.push([null, '']);
+                }
+                var help = {};
+                if (help_field){
+                    result.forEach(function(x) {
+                        help[x.id] = x[help_field];
+                    });
+                }
+                this._last_domain = [domain, context];
+                this._domain_cache[jdomain] = selection;
+                this.selection = jQuery.extend([], selection);
+                this.help = help;
+                if (callback) {
+                    callback(this.selection, this.help);
+                }
+            }.bind(this));
+            prm.fail(function() {
+                this._last_domain = null;
+                this.selection = [];
+                if (callback) {
+                    callback(this.selection, this.help);
+                }
+            }.bind(this));
+        }
+    };
+    this._selection_prm.done(_update_selection.bind(this));
+};
+
+Sao.Wizard.prototype.process = function() {
+    if (this.__processing || this.__waiting_response) {
+        return;
+    }
+    var process = function() {
+        if (this.state == this.end_state) {
+            this.end();
+            return;
+        }
+        var ctx = jQuery.extend({}, this.context);
+        var data = {};
+        if (this.screen) {
+            data[this.screen_state] = this.screen.get_on_change_value();
+        }
+        Sao.rpc({
+            'method': 'wizard.' + this.action + '.execute',
+            'params': [this.session_id, data, this.state, ctx]
+        }, this.session).then(function(result) {
+            if (result.view) {
+                this.clean();
+                var view = result.view;
+                this.update(view.fields_view, view.buttons);
+                
+                
+                this.screen.new_(false).then(function() {
+                    // Kalenis: Merge defaults and values before displaying the screen(new in 7.0)
+                    var vals = jQuery.extend({}, view.defaults, view.values || {});
+                    this.screen.current_record.set_default(vals);
+                    
+                    this.update_buttons();
+                    this.screen.set_cursor();
+                }.bind(this));
+
+                this.screen_state = view.state;
+                this.__waiting_response = true;
+            } else {
+                this.state = this.end_state;
+            }
+
+            var execute_actions = function execute_actions() {
+                if (result.actions) {
+                    result.actions.forEach(function(action) {
+                        var context = jQuery.extend({}, this.context);
+                        // Remove wizard keys added by run
+                        delete context.active_id;
+                        delete context.active_ids;
+                        delete context.active_model;
+                        delete context.action_id;
+                        Sao.Action.execute(
+                            action[0], action[1], context);
+                    }.bind(this));
+                }
+            }.bind(this);
+
+            if (this.state == this.end_state) {
+                this.end().then(execute_actions);
+            } else {
+                execute_actions();
+            }
+            this.__processing = false;
+        }.bind(this), function(result) {
+            // TODO end for server error.
+            this.__processing = false;
+        }.bind(this));
+    };
+    process.call(this);
+};
