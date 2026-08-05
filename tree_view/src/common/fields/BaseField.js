@@ -109,19 +109,19 @@ function BaseField(props) {
         let data = e.clipboardData.getData('text')
         
         if(data){
-            let dataArray = data.split('\n')
+            // Spreadsheet paste uses newlines between rows and tabs between
+            // columns. Splitting on spaces breaks char values that contain
+            // spaces.
+            let dataArray = data.split(/\r\n|\n|\r/)
+                .filter(function(row){
+                    return row.length > 0
+                })
 
             if(dataArray.length > 1){
             if(props.pasteArray){
                e.preventDefault()
-               dataArray =  dataArray.map(function(row){
-                    row = row.split(/\b(\s)/).filter(function(value){
-                        value = value.trim()
-                        return Boolean(value)
-                    }
-                        )
-                    return row;
-                    
+               dataArray = dataArray.map(function(row){
+                    return row.split('\t')
                 })
                     props.pasteArray(dataArray)
                 }
