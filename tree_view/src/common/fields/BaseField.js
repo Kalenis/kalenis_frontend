@@ -105,32 +105,42 @@ function BaseField(props) {
         }
     }
 
+    function cleanPastedCell(cell) {
+        return cell.replace(/[\r\n\t]/g, '').trim()
+    }
+
     function onPaste(e){
         let data = e.clipboardData.getData('text')
-        
-        if(data){
-            // Spreadsheet paste uses newlines between rows and tabs between
-            // columns. Splitting on spaces breaks char values that contain
-            // spaces.
-            let dataArray = data.split(/\r\n|\n|\r/)
-                .filter(function(row){
-                    return row.length > 0
-                })
 
-            if(dataArray.length > 1){
-            if(props.pasteArray){
-               e.preventDefault()
-               dataArray = dataArray.map(function(row){
-                    return row.split('\t')
-                })
-                    props.pasteArray(dataArray)
-                }
-                
-
-            }
-            
+        if(!data){
+            return
         }
 
+        const hasForbidden = /[\r\n\t]/.test(data)
+        const normalized = data.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
+        let rows = normalized.split('\n')
+            .map(function(row){
+                return row.trim()
+            })
+            .filter(function(row){
+                return row.length > 0
+            })
+
+        if(rows.length > 1 && props.pasteArray){
+            e.preventDefault()
+            props.pasteArray(rows.map(function(row){
+                return row.split('\t').map(cleanPastedCell)
+            }))
+            return
+        }
+
+        if(hasForbidden){
+            e.preventDefault()
+            const cleaned = cleanPastedCell(rows[0] || data)
+            setValue(cleaned)
+            setTouched(true)
+            props.setValue(cleaned)
+        }
     }
 
 

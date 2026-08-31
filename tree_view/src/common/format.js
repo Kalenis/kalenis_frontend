@@ -33,11 +33,18 @@ export const validateNumber = (value) => {
     return parseFloat(value);
 }
 
+const cleanCharValue = (value) => {
+    if (typeof value !== 'string') {
+        return value
+    }
+    return value.replace(/[\r\n\t]/g, '')
+}
+
 export const validateInput =  {
     'integer':validateNumber,
     'float':validateNumber,
     'numeric':validateNumber,
-    'char': (value) => {return value}
+    'char': cleanCharValue
 }
 
 const formatter = {
