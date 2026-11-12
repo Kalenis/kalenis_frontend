@@ -1157,6 +1157,15 @@ class TreeView extends PureComponent {
 
 
     let res = await ws.Post('model.user.view.user_view_set', [view], this.props.sao_props.session)
+    if (res.error) {
+      if (res.error[0] === 'UserError') {
+        window.Sao.common.warning.run(res.error[1][1], res.error[1][0])
+      }
+      else {
+        window.Sao.common.error.run(res.error[0], res.error[1])
+      }
+      return false
+    }
 
 
     let cv = { ...view }
@@ -1175,6 +1184,7 @@ class TreeView extends PureComponent {
       user_views: uv,
       current_view: cv
     })
+    return true
   }
 
   changeViewLimit(value) {

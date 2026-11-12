@@ -473,10 +473,11 @@ function ViewManager(props) {
 
     }
 
-    function createView(view) {
-        
-        props.saveView(view)
-        setNewViewModal(false)
+    async function createView(view) {
+        const saved = await props.saveView(view)
+        if (saved) {
+            setNewViewModal(false)
+        }
     }
 
 
